@@ -4,9 +4,10 @@ import type { EntryGenerator, PageLoad } from './$types';
 
 export const entries: EntryGenerator = () => projects.map((p) => ({ slug: p.slug }));
 
-export const load: PageLoad = ({ params }) => {
+export const load: PageLoad = ({ params, data }) => {
 	const project = getProject(params.slug);
 	if (!project) error(404, 'Project not found');
 	const index = projects.indexOf(project);
-	return { project, next: projects[(index + 1) % projects.length] };
+	// `data` holds the GitHub stats snapshot from +page.server.ts.
+	return { ...data, project, next: projects[(index + 1) % projects.length] };
 };

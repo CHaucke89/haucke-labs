@@ -2,6 +2,7 @@
 	import '../app.css';
 	import favicon from '#lib/assets/favicon.svg';
 	import { page } from '$app/state';
+	import { AUTHOR, GITHUB_URL, LINKEDIN_URL, SOURCE_URL } from '#lib/site.ts';
 	import type { LayoutProps } from './$types';
 
 	let { children }: LayoutProps = $props();
@@ -10,10 +11,14 @@
 		{ href: '/', label: 'Projects' },
 		{ href: '/about', label: 'About' }
 	];
+
+	// Project pages count as part of "Projects".
+	const isCurrent = (href: string, path: string) =>
+		href === '/' ? path === '/' || path.startsWith('/projects/') : path === href;
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<link rel="icon" href={favicon} type="image/svg+xml" />
 </svelte:head>
 
 <a class="skip" href="#main">Skip to content</a>
@@ -22,12 +27,13 @@
 	<a class="brand mono" href="/">haucke<span>labs</span></a>
 	<nav aria-label="Main">
 		{#each nav as item (item.href)}
-			<a href={item.href} aria-current={item.href === '/' ? page.url.pathname === '/' || page.url.pathname.startsWith('/projects') : page.url.pathname === item.href ? 'page' : undefined}
-				>{item.label}</a
+			<a
+				href={item.href}
+				aria-current={isCurrent(item.href, page.url.pathname) ? 'page' : undefined}>{item.label}</a
 			>
 		{/each}
-		<a href="https://github.com/CHaucke89">GitHub</a>
-		<a href="https://www.linkedin.com/in/christopher-haucke-816b00314/">LinkedIn</a>
+		<a href={GITHUB_URL}>GitHub</a>
+		<a href={LINKEDIN_URL}>LinkedIn</a>
 	</nav>
 </header>
 
@@ -36,7 +42,11 @@
 </main>
 
 <footer class="container">
-	<p>© {new Date().getFullYear()} Christopher Haucke · Built with SvelteKit, hosted on Cloudflare</p>
+	<p>
+		© {new Date().getFullYear()}
+		{AUTHOR} · Built with SvelteKit, hosted on Cloudflare ·
+		<a href={SOURCE_URL}>Source for this site</a>
+	</p>
 </footer>
 
 <style>

@@ -1,7 +1,13 @@
-<svelte:head>
-	<title>About · Haucke Labs</title>
-	<meta name="description" content="About Christopher Haucke." />
-</svelte:head>
+<script lang="ts">
+	import Seo from '#lib/components/Seo.svelte';
+	import { GITHUB_URL, LINKEDIN_URL } from '#lib/site.ts';
+</script>
+
+<Seo
+	title="About"
+	description="About Christopher Haucke: what he builds, what he’s learning, and how to get in touch."
+	type="profile"
+/>
 
 <article>
 	<h1>About me</h1>
@@ -36,12 +42,8 @@
 
 	<h2>Get in touch</h2>
 	<ul>
-		<li><a href="https://github.com/CHaucke89">GitHub: CHaucke89</a></li>
-		<li>
-			<a href="https://www.linkedin.com/in/christopher-haucke-816b00314/"
-				>LinkedIn: Christopher Haucke</a
-			>
-		</li>
+		<li><a href={GITHUB_URL} rel="me">GitHub: CHaucke89</a></li>
+		<li><a href={LINKEDIN_URL} rel="me">LinkedIn: Christopher Haucke</a></li>
 	</ul>
 </article>
 

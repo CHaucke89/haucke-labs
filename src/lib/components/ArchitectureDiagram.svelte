@@ -1,10 +1,25 @@
 <script lang="ts">
-	import { NODE_H, NODE_W, type Diagram, type DiagramEdge, type DiagramNode } from '#lib/diagrams.ts';
+	import {
+		NODE_H,
+		NODE_W,
+		type Diagram,
+		type DiagramEdge,
+		type DiagramNode,
+		type NodeKind
+	} from '#lib/diagrams.ts';
 
 	let { diagram, id }: { diagram: Diagram; id: string } = $props();
 
 	let active = $state<string | null>(null);
 	let pinned = $state<string | null>(null);
+
+	const kindLabel: Record<NodeKind, string> = {
+		mine: 'My code',
+		upstream: 'Upstream or third-party',
+		store: 'Data or channel',
+		external: 'Outside the system'
+	};
+	const kinds = Object.keys(kindLabel) as NodeKind[];
 
 	const rect = (n: DiagramNode) => ({ x: n.x, y: n.y, w: n.w ?? NODE_W, h: n.h ?? NODE_H });
 	let byId = $derived(new Map(diagram.nodes.map((n) => [n.id, n])));
@@ -53,17 +68,58 @@
 			(e) => (e.from === current && e.to === nid) || (e.to === current && e.from === nid)
 		);
 
+	// The text version of the diagram: what each component connects to, and where it sits.
+	const end = (nid: string, label?: string) => {
+		const name = byId.get(nid)?.label ?? nid;
+		return label ? `${name} (${label})` : name;
+	};
+
+	function connections(nid: string): string {
+		const from = diagram.edges.filter((e) => !e.both && e.to === nid).map((e) => end(e.from, e.label));
+		const to = diagram.edges.filter((e) => !e.both && e.from === nid).map((e) => end(e.to, e.label));
+		const both = diagram.edges
+			.filter((e) => e.both && (e.from === nid || e.to === nid))
+			.map((e) => end(e.from === nid ? e.to : e.from, e.label));
+		return [
+			from.length ? `Comes from: ${from.join(', ')}.` : '',
+			to.length ? `Leads to: ${to.join(', ')}.` : '',
+			both.length ? `Two-way with: ${both.join(', ')}.` : ''
+		]
+			.filter(Boolean)
+			.join(' ');
+	}
+
+	const about = (n: DiagramNode) => `${n.detail} ${connections(n.id)}`.trim();
+
+	/** The groups drawn around a node, outermost first. */
+	function placement(n: DiagramNode): string {
+		const r = rect(n);
+		const cx = r.x + r.w / 2;
+		const cy = r.y + r.h / 2;
+		return diagram.groups
+			.filter((g) => cx >= g.x && cx <= g.x + g.w && cy >= g.y && cy <= g.y + g.h)
+			.sort((a, b) => b.w * b.h - a.w * a.h)
+			.map((g) => g.label)
+			.join(' / ');
+	}
+
 	function toggle(nid: string) {
 		pinned = pinned === nid ? null : nid;
 	}
 
-	function onKey(event: KeyboardEvent, nid: string) {
-		if (event.key === 'Enter' || event.key === ' ') {
-			event.preventDefault();
+	// Match a native button: Enter acts on keydown, Space on keyup.
+	function onKeydown(event: KeyboardEvent, nid: string) {
+		if (event.key === 'Enter') {
 			toggle(nid);
+		} else if (event.key === ' ') {
+			event.preventDefault(); // Space would otherwise scroll the page.
 		} else if (event.key === 'Escape') {
 			pinned = null;
 		}
+	}
+
+	function onKeyup(event: KeyboardEvent, nid: string) {
+		if (event.key === ' ') toggle(nid);
 	}
 
 	const textWidth = (s: string) => s.length * 6.4 + 10;
@@ -75,12 +131,14 @@
 		<span class="caption">{diagram.caption}</span>
 	</figcaption>
 
+	<p class="scroll-hint" aria-hidden="true">Scroll sideways to see the whole diagram →</p>
+
 	<div class="scroll">
 		<svg
 			viewBox="0 0 {diagram.width} {diagram.height}"
 			class:focused={current !== null}
 			role="group"
-			aria-label="{diagram.title}. Select a component to read what it does."
+			aria-label="Components"
 		>
 			<defs>
 				<marker
@@ -139,26 +197,31 @@
 					tabindex="0"
 					aria-pressed={pinned === n.id}
 					aria-label="{n.label}{n.sub ? `, ${n.sub}` : ''}"
+					aria-describedby="{id}-about-{n.id}"
 					onmouseenter={() => (active = n.id)}
 					onmouseleave={() => (active = null)}
 					onfocus={() => (active = n.id)}
 					onblur={() => (active = null)}
 					onclick={() => toggle(n.id)}
-					onkeydown={(ev) => onKey(ev, n.id)}
+					onkeydown={(ev) => onKeydown(ev, n.id)}
+					onkeyup={(ev) => onKeyup(ev, n.id)}
 				>
-					<rect x={r.x} y={r.y} width={r.w} height={r.h} rx="8" />
+					<!-- Data and channels are pill-shaped, so the kinds differ by more than color. -->
+					<rect x={r.x} y={r.y} width={r.w} height={r.h} rx={n.kind === 'store' ? r.h / 2 : 8} />
 					<text class="label" x={r.x + r.w / 2} y={r.y + r.h / 2 - (n.sub ? 3 : -5)}
 						>{n.label}</text
 					>
 					{#if n.sub}
-						<text class="sub" x={r.x + r.w / 2} y={r.y + r.h / 2 + 15}>{n.sub}</text>
+						<!-- The space keeps the text content readable as "label sub", not "labelsub". -->
+						{' '}<text class="sub" x={r.x + r.w / 2} y={r.y + r.h / 2 + 15}>{n.sub}</text>
 					{/if}
 				</g>
 			{/each}
 		</svg>
 	</div>
 
-	<div class="detail" aria-live="polite">
+	<!-- Screen readers get the same text as each component's description, so this stays visual. -->
+	<div class="detail" aria-hidden="true">
 		{#if currentNode}
 			<p><strong>{currentNode.label}.</strong> {currentNode.detail}</p>
 		{:else}
@@ -166,12 +229,35 @@
 		{/if}
 	</div>
 
-	<ul class="legend" aria-label="Legend">
-		<li><span class="swatch mine"></span>My code</li>
-		<li><span class="swatch upstream"></span>Upstream or third-party</li>
-		<li><span class="swatch store"></span>Data or channel</li>
-		<li><span class="swatch external"></span>Outside the system</li>
+	<ul class="legend" role="list" aria-label="Legend">
+		{#each kinds as k (k)}
+			<li><span class="swatch {k}"></span>{kindLabel[k]}</li>
+		{/each}
 	</ul>
+
+	<details class="as-text">
+		<summary>Read the diagram as text</summary>
+		<ul role="list">
+			{#each diagram.nodes as n (n.id)}
+				{@const place = placement(n)}
+				<li>
+					<p class="name">
+						<strong>{n.label}</strong>{#if n.sub}<span class="mono">, {n.sub}</span>{/if}
+					</p>
+					<p class="kind">{kindLabel[n.kind]}{place ? `. Group: ${place}` : ''}</p>
+					<p>{about(n)}</p>
+				</li>
+			{/each}
+		</ul>
+	</details>
+
+	<!-- Description sources for the components. Browsers skip text inside a closed <details>,
+	     but read hidden elements that aria-describedby points to. -->
+	<div hidden>
+		{#each diagram.nodes as n (n.id)}
+			<span id="{id}-about-{n.id}">{about(n)}</span>
+		{/each}
+	</div>
 </figure>
 
 <style>
@@ -181,12 +267,16 @@
 		background: var(--surface);
 		border: 1px solid var(--border);
 		border-radius: 12px;
+		container-type: inline-size;
 		--d-mine: var(--accent);
 		--d-mine-fill: var(--accent-soft);
 		--d-upstream: var(--muted);
 		--d-store: var(--store);
 		--d-store-fill: var(--store-soft);
-		--d-external: #8b949e;
+		--d-external: var(--muted);
+		--d-plain-fill: var(--bg);
+		/* Group outlines need 3:1 against the panel, which --border is too faint for. */
+		--d-group: color-mix(in oklab, var(--muted) 75%, var(--surface));
 	}
 	figcaption {
 		display: grid;
@@ -199,6 +289,18 @@
 	.caption {
 		color: var(--muted);
 		font-size: 0.925rem;
+	}
+	.scroll-hint {
+		display: none;
+		margin: 0 0 0.5rem;
+		font-size: 0.8rem;
+		color: var(--muted);
+	}
+	/* The SVG never shrinks below 640px, so narrower panels scroll. */
+	@container (width < 640px) {
+		.scroll-hint {
+			display: block;
+		}
 	}
 	.scroll {
 		overflow-x: auto;
@@ -213,7 +315,7 @@
 	}
 	.group rect {
 		fill: none;
-		stroke: var(--border);
+		stroke: var(--d-group);
 		stroke-dasharray: 4 4;
 	}
 	.group text {
@@ -266,9 +368,10 @@
 	.node.mine rect {
 		fill: var(--d-mine-fill);
 		stroke: var(--d-mine);
+		stroke-width: 2;
 	}
 	.node.upstream rect {
-		fill: var(--bg);
+		fill: var(--d-plain-fill);
 		stroke: var(--d-upstream);
 	}
 	.node.store rect {
@@ -276,7 +379,7 @@
 		stroke: var(--d-store);
 	}
 	.node.external rect {
-		fill: var(--bg);
+		fill: var(--d-plain-fill);
 		stroke: var(--d-external);
 		stroke-dasharray: 5 3;
 	}
@@ -338,12 +441,13 @@
 		gap: 0.4rem;
 	}
 	.swatch {
-		width: 14px;
+		width: 16px;
 		height: 10px;
 		border-radius: 3px;
 		border: 1.5px solid;
 	}
 	.swatch.mine {
+		border-width: 2px;
 		border-color: var(--d-mine);
 		background: var(--d-mine-fill);
 	}
@@ -351,6 +455,7 @@
 		border-color: var(--d-upstream);
 	}
 	.swatch.store {
+		border-radius: 999px;
 		border-color: var(--d-store);
 		background: var(--d-store-fill);
 	}
@@ -358,11 +463,90 @@
 		border-color: var(--d-external);
 		border-style: dashed;
 	}
+	.as-text {
+		margin-top: 1rem;
+		border-top: 1px solid var(--border);
+		padding-top: 0.75rem;
+	}
+	.as-text summary {
+		cursor: pointer;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--accent);
+		inline-size: fit-content;
+	}
+	.as-text summary:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 3px;
+		border-radius: 4px;
+	}
+	.as-text ul {
+		list-style: none;
+		padding: 0;
+		margin: 1rem 0 0;
+		display: grid;
+		gap: 1rem;
+	}
+	.as-text p {
+		margin: 0;
+		font-size: 0.925rem;
+	}
+	.as-text .kind {
+		color: var(--muted);
+		font-size: 0.8rem;
+	}
+	.as-text .mono {
+		font-size: 0.8rem;
+		color: var(--muted);
+	}
 	@media (prefers-reduced-motion: reduce) {
 		.edge path,
 		.node,
 		.node rect {
 			transition: none;
+		}
+	}
+	/* Windows High Contrast and similar: system colors only, kinds told apart by shape.
+	   Browsers don't force SVG fill and stroke, so the tokens are remapped here. */
+	@media (forced-colors: active) {
+		.diagram {
+			--d-mine: CanvasText;
+			--d-mine-fill: Canvas;
+			--d-upstream: CanvasText;
+			--d-store: CanvasText;
+			--d-store-fill: Canvas;
+			--d-external: CanvasText;
+			--d-plain-fill: Canvas;
+			--d-group: CanvasText;
+		}
+		.edge path {
+			stroke: CanvasText;
+		}
+		.label-bg {
+			fill: Canvas;
+		}
+		.node.mine rect {
+			stroke-width: 3;
+		}
+		.swatch.mine {
+			border-width: 3px;
+		}
+		.arrowhead,
+		.group text,
+		.edge text,
+		.node .label,
+		.node .sub {
+			fill: CanvasText;
+		}
+		.edge.lit path,
+		.node.active rect,
+		.node.pinned rect,
+		.node:focus-visible rect {
+			stroke: Highlight;
+		}
+		.focused .edge,
+		.focused .node {
+			opacity: 1;
 		}
 	}
 </style>

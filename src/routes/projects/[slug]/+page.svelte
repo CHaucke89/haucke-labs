@@ -1,17 +1,33 @@
 <script lang="ts">
 	import ArchitectureDiagram from '#lib/components/ArchitectureDiagram.svelte';
+	import RepoStats from '#lib/components/RepoStats.svelte';
+	import Seo from '#lib/components/Seo.svelte';
 	import { diagrams } from '#lib/diagrams.ts';
+	import { repoName } from '#lib/github.ts';
+	import { AUTHOR } from '#lib/site.ts';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 	let project = $derived(data.project);
 	let diagram = $derived(diagrams[project.slug]);
+	let sourceCode = $derived({
+		'@context': 'https://schema.org',
+		'@type': 'SoftwareSourceCode',
+		name: project.name,
+		description: project.tagline,
+		codeRepository: project.repo,
+		author: { '@type': 'Person', name: AUTHOR }
+	});
 </script>
 
-<svelte:head>
-	<title>{project.name} · Haucke Labs</title>
-	<meta name="description" content={project.tagline} />
-</svelte:head>
+<Seo
+	title={project.name}
+	description={project.summary}
+	image="/og/{project.slug}.png"
+	imageAlt="{project.name}: {project.tagline}"
+	type="article"
+	jsonLd={sourceCode}
+/>
 
 <article>
 	<p class="back"><a href="/">← All projects</a></p>
@@ -25,9 +41,17 @@
 				<dd>{project.role}</dd>
 			</div>
 			<div>
+				<dt>GitHub</dt>
+				<dd>
+					{#key project.slug}
+						<RepoStats repo={repoName(project.repo)} initial={data.stats} />
+					{/key}
+				</dd>
+			</div>
+			<div>
 				<dt>Stack</dt>
 				<dd>
-					<ul class="tech">
+					<ul class="tech" role="list">
 						{#each project.tech as t (t)}
 							<li class="mono">{t}</li>
 						{/each}

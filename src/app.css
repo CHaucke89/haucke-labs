@@ -10,7 +10,7 @@
 	--store-soft: rgb(163 113 247 / 0.12);
 	--mono: ui-monospace, 'SFMono-Regular', 'JetBrains Mono', Menlo, Consolas, monospace;
 	--sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-	color-scheme: dark;
+	color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: light) {
@@ -24,7 +24,6 @@
 		--accent-soft: rgb(194 65 12 / 0.08);
 		--store: #8250df;
 		--store-soft: rgb(130 80 223 / 0.08);
-		color-scheme: light;
 	}
 }
 
