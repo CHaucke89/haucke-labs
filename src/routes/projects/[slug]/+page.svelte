@@ -1,8 +1,11 @@
 <script lang="ts">
+	import ArchitectureDiagram from '#lib/components/ArchitectureDiagram.svelte';
+	import { diagrams } from '#lib/diagrams.ts';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 	let project = $derived(data.project);
+	let diagram = $derived(diagrams[project.slug]);
 </script>
 
 <svelte:head>
@@ -49,6 +52,15 @@
 		{/each}
 	</section>
 
+	{#if diagram}
+		<section aria-labelledby="architecture" class="wide">
+			<h2 id="architecture">How it fits together</h2>
+			{#key project.slug}
+				<ArchitectureDiagram {diagram} id="diagram-{project.slug}" />
+			{/key}
+		</section>
+	{/if}
+
 	<section aria-labelledby="challenges">
 		<h2 id="challenges">The hard parts</h2>
 		<div class="challenges">
@@ -79,6 +91,7 @@
 <style>
 	article {
 		max-width: 46rem;
+		--wide: min(64rem, 100vw - 2.5rem);
 		padding-block: 1rem 2rem;
 	}
 	.back a {
@@ -147,6 +160,9 @@
 	}
 	h2 {
 		font-size: 1.4rem;
+	}
+	.wide {
+		width: var(--wide);
 	}
 	.challenges {
 		display: grid;
