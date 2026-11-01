@@ -29,7 +29,7 @@
 	<ul class="grid">
 		{#each projects as project (project.slug)}
 			<li class="card">
-				<h3>{project.name}</h3>
+				<h3><a class="title" href="/projects/{project.slug}">{project.name}</a></h3>
 				<p class="tagline">{project.tagline}</p>
 				<p>{project.summary}</p>
 				<ul class="highlights">
@@ -42,9 +42,14 @@
 						<li class="mono">{t}</li>
 					{/each}
 				</ul>
-				<a class="repo" href={project.repo}
-					>View source<span class="visually-hidden"> for {project.name}</span> →</a
-				>
+				<p class="actions">
+					<a href="/projects/{project.slug}"
+						>Read more<span class="visually-hidden"> about {project.name}</span> →</a
+					>
+					<a class="muted" href={project.repo}
+						>Source<span class="visually-hidden"> for {project.name}</span></a
+					>
+				</p>
 			</li>
 		{/each}
 	</ul>
@@ -123,8 +128,20 @@
 		background: var(--accent-soft);
 		color: var(--accent);
 	}
-	.repo {
-		margin-top: auto;
+	.title {
+		color: var(--text);
+		text-decoration: none;
+	}
+	.title:hover {
+		color: var(--accent);
+	}
+	.actions {
+		margin: auto 0 0;
+		display: flex;
+		justify-content: space-between;
 		font-weight: 600;
+	}
+	.actions .muted {
+		color: var(--muted);
 	}
 </style>

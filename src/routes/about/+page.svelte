@@ -37,6 +37,11 @@
 	<h2>Get in touch</h2>
 	<ul>
 		<li><a href="https://github.com/CHaucke89">GitHub: CHaucke89</a></li>
+		<li>
+			<a href="https://www.linkedin.com/in/christopher-haucke-816b00314/"
+				>LinkedIn: Christopher Haucke</a
+			>
+		</li>
 	</ul>
 </article>
 

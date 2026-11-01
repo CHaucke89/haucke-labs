@@ -22,11 +22,12 @@
 	<a class="brand mono" href="/">haucke<span>labs</span></a>
 	<nav aria-label="Main">
 		{#each nav as item (item.href)}
-			<a href={item.href} aria-current={page.url.pathname === item.href ? 'page' : undefined}
+			<a href={item.href} aria-current={item.href === '/' ? page.url.pathname === '/' || page.url.pathname.startsWith('/projects') : page.url.pathname === item.href ? 'page' : undefined}
 				>{item.label}</a
 			>
 		{/each}
 		<a href="https://github.com/CHaucke89">GitHub</a>
+		<a href="https://www.linkedin.com/in/christopher-haucke-816b00314/">LinkedIn</a>
 	</nav>
 </header>
 
