@@ -184,8 +184,8 @@
 		--d-mine: var(--accent);
 		--d-mine-fill: var(--accent-soft);
 		--d-upstream: var(--muted);
-		--d-store: #d29922;
-		--d-store-fill: rgb(210 153 34 / 0.1);
+		--d-store: var(--store);
+		--d-store-fill: var(--store-soft);
 		--d-external: #8b949e;
 	}
 	figcaption {

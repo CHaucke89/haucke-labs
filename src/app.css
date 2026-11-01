@@ -4,8 +4,10 @@
 	--border: #2a313c;
 	--text: #e6edf3;
 	--muted: #9aa5b1;
-	--accent: #58a6ff;
-	--accent-soft: rgb(88 166 255 / 0.12);
+	--accent: #fb923c;
+	--accent-soft: rgb(251 146 60 / 0.12);
+	--store: #a371f7;
+	--store-soft: rgb(163 113 247 / 0.12);
 	--mono: ui-monospace, 'SFMono-Regular', 'JetBrains Mono', Menlo, Consolas, monospace;
 	--sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 	color-scheme: dark;
@@ -18,8 +20,10 @@
 		--border: #d8dee4;
 		--text: #1f2328;
 		--muted: #59636e;
-		--accent: #0969da;
-		--accent-soft: rgb(9 105 218 / 0.08);
+		--accent: #c2410c;
+		--accent-soft: rgb(194 65 12 / 0.08);
+		--store: #8250df;
+		--store-soft: rgb(130 80 223 / 0.08);
 		color-scheme: light;
 	}
 }
