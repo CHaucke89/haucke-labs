@@ -62,7 +62,7 @@ export const projects: Project[] = [
 	},
 	{
 		slug: 'op-remote-ui',
-		name: 'op-remote-ui-raylib',
+		name: 'openpilot Remote UI Streamer',
 		tagline: 'Stream and control an openpilot device from any browser',
 		summary:
 			'openpilot moved its UI from Qt/C++ to raylib/Python, which broke the community’s remote UI streamer. I ported it to the new stack: frames go from the render loop to a browser over WebSocket with no disk writes, and touch input flows back the other way.',

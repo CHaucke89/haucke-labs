@@ -31,7 +31,7 @@
 		a fork current with a fast-moving upstream has taught me to read unfamiliar code carefully, keep
 		changes small, and contribute fixes back: one of my features is now part of sunnypilot itself.
 		When openpilot rewrote its UI and broke the remote-display tool I relied on, I ported it to the
-		new stack as <a href="https://github.com/CHaucke89/op-remote-ui-raylib">op-remote-ui-raylib</a>.
+		new stack as <a href="https://github.com/CHaucke89/op-remote-ui-raylib">openpilot Remote UI Streamer</a>.
 	</p>
 
 	<p>
