@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import favicon from '#lib/assets/favicon.svg';
+	import Logo from '#lib/components/Logo.svelte';
 	import { page } from '$app/state';
 	import { AUTHOR, GITHUB_URL, LINKEDIN_URL, SOURCE_URL } from '#lib/site.ts';
 	import type { LayoutProps } from './$types';
@@ -24,7 +25,7 @@
 <a class="skip" href="#main">Skip to content</a>
 
 <header class="container">
-	<a class="brand mono" href="/">haucke<span>labs</span></a>
+	<a class="brand mono" href="/"><Logo /><span>haucke<span class="accent">labs</span></span></a>
 	<nav aria-label="Main">
 		{#each nav as item (item.href)}
 			<a
@@ -71,12 +72,15 @@
 		padding-block: 1.5rem;
 	}
 	.brand {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.55rem;
 		font-weight: 700;
 		font-size: 1.1rem;
 		color: var(--text);
 		text-decoration: none;
 	}
-	.brand span {
+	.brand .accent {
 		color: var(--accent);
 	}
 	nav {

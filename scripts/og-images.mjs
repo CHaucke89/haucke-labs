@@ -69,11 +69,12 @@ function card({ title, subtitle, chips, url }) {
 }
 
 function icon() {
-	// Full-bleed square: iOS rounds the corners itself.
-	const svg = readFileSync(join(root, 'src/lib/assets/favicon.svg'), 'utf8').replace('rx="7"', 'rx="0"');
+	// Full-bleed square (iOS rounds the corners itself): the hex favicon centered on the site background.
+	const svg = readFileSync(join(root, 'src/lib/assets/favicon.svg'), 'utf8');
 	return `<!doctype html><html><head><style>
-	* { margin: 0; } html, body { width: 180px; height: 180px; overflow: hidden; }
-	svg { display: block; width: 180px; height: 180px; }
+	* { margin: 0; } html, body { width: 180px; height: 180px; overflow: hidden; background: ${BG}; }
+	body { display: grid; place-items: center; }
+	svg { display: block; width: 132px; height: 132px; }
 	</style></head><body>${svg}</body></html>`;
 }
 
