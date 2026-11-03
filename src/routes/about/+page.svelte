@@ -14,12 +14,12 @@
 
 	<!-- DRAFT BIO: replace with your own words. -->
 	<p class="lede">
-		I’m Chris Haucke. I’m working my way into software engineering, and I learn best by building
+		I’m Chris Haucke. I’m pivoting back into software engineering, and I learn best by jumping in and building
 		things I actually use.
 	</p>
 
 	<p>
-		My day job puts me close to the machines: setting up and supporting Windows workstations for
+		My day job puts me close to the machines: setting up and supporting Windows workstations for clinical
 		imaging systems. When that setup turned into a long checklist of repetitive steps, I wrote the
 		<a href="https://github.com/CHaucke89/canfield-deployment-toolkit">Canfield Deployment Toolkit</a>
 		to turn it into one guided app, with automated builds and releases on GitHub.
@@ -29,9 +29,9 @@
 		Outside of work I maintain <a href="https://github.com/CHaucke89/cloudypilot">cloudypilot</a>,
 		my fork of the open source driver-assistance software sunnypilot, running on my own car. Keeping
 		a fork current with a fast-moving upstream has taught me to read unfamiliar code carefully, keep
-		changes small, and contribute fixes back: one of my features is now part of sunnypilot itself.
+		changes small, and contribute fixes back: several of my pull requestes have been merged into sunnypilot.
 		When openpilot rewrote its UI and broke the remote-display tool I relied on, I ported it to the
-		new stack as <a href="https://github.com/CHaucke89/op-remote-ui-raylib">openpilot Remote UI Streamer</a>.
+		new stack: <a href="https://github.com/CHaucke89/op-remote-ui-raylib">openpilot Remote UI Streamer</a>.
 	</p>
 
 	<p>
