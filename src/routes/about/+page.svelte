@@ -29,7 +29,7 @@
 		Outside of work I maintain <a href="https://github.com/CHaucke89/cloudypilot">cloudypilot</a>,
 		my fork of the open source driver-assistance software sunnypilot, running on my own car. Keeping
 		a fork current with a fast-moving upstream has taught me to read unfamiliar code carefully, keep
-		changes small, and contribute fixes back: several of my pull requestes have been merged into sunnypilot.
+		changes small, and contribute fixes back: several of my pull requests have been merged into sunnypilot.
 		When openpilot rewrote its UI and broke the remote-display tool I relied on, I ported it to the
 		new stack: <a href="https://github.com/CHaucke89/op-remote-ui-raylib">openpilot Remote UI Streamer</a>.
 	</p>
@@ -38,6 +38,12 @@
 		Right now I’m broadening my skills across the stack, from Python and C++ on embedded Linux to
 		web development. This site is part of that too: it’s built with SvelteKit and TypeScript and
 		deployed on Cloudflare.
+	</p>
+
+	<p>
+		Away from the keyboard I’m still building: automating my home, wiring ESP32 boards into custom
+		devices, and 3D printing enclosures and parts for them. Most of that happens when I’m not
+		wrangling my one-year-old son.
 	</p>
 
 	<h2>Get in touch</h2>
