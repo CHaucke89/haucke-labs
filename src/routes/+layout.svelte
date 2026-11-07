@@ -10,6 +10,7 @@
 
 	const nav = [
 		{ href: '/', label: 'Projects' },
+		{ href: '/lab', label: 'Lab' },
 		{ href: '/about', label: 'About' }
 	];
 

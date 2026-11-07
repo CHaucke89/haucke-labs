@@ -17,7 +17,13 @@
 	"observability": {
 		"enabled": true
 	},
-	"upload_source_maps": true
+	"upload_source_maps": true,
+	/**
+	 * Latest homelab snapshot pushed by Home Assistant, shown on /lab.
+	 * No id: `wrangler deploy` provisions the namespace on first deploy.
+	 * The ingest token is a secret: `wrangler secret put LAB_INGEST_TOKEN`.
+	 */
+	"kv_namespaces": [{ "binding": "LAB" }]
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
