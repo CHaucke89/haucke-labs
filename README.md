@@ -76,6 +76,35 @@ curl -X POST localhost:5173/api/lab -H "Authorization: Bearer dev-token-change-m
 
 `pnpm cf-typegen` adds a `GlobalProps.mainModule` line pointing into `.svelte-kit/` when a build exists. Delete it, or `pnpm check` will type-check the build output.
 
+### Printer camera
+
+`/lab` can show the 3D printer's camera (mjpg-streamer). The browser only ever talks to `/lab/camera`; the Worker fetches the camera through a Cloudflare Tunnel, presenting an Access service token, and streams the response back. The camera hostname and token never reach the page, and the camera stays behind Access for everyone else.
+
+- `GET /lab/camera` returns one JPEG (`?action=snapshot`). The page refreshes it every 5 seconds.
+- `GET /lab/camera?live` streams MJPEG (`?action=stream`). The page stops it after 2 minutes or when the tab is hidden.
+
+One-time setup:
+
+1. **Tunnel**: add a public hostname (e.g. `printer-cam.example.com`) to the existing tunnel, with service `http://192.168.4.140:8080`.
+2. **Service token**: Zero Trust → Access → Service credentials → create a token. Copy the client ID and secret.
+3. **Access policy**: on the Access application for that hostname, add a policy with action *Service Auth* that includes the token.
+4. **Worker secrets**:
+
+   ```sh
+   pnpm exec wrangler secret put CAMERA_URL                  # https://printer-cam.example.com/
+   pnpm exec wrangler secret put CAMERA_ACCESS_CLIENT_ID
+   pnpm exec wrangler secret put CAMERA_ACCESS_CLIENT_SECRET
+   ```
+
+Without `CAMERA_URL` (previews, local dev by default) the camera is hidden. Check the token from a shell with:
+
+```sh
+curl -sI "https://printer-cam.example.com/?action=snapshot" \
+  -H "CF-Access-Client-Id: <id>" -H "CF-Access-Client-Secret: <secret>"
+```
+
+A `200` with `content-type: image/jpeg` means the Worker will get through; a `302` to `cloudflareaccess.com` means the policy doesn't include the token.
+
 ## Share preview images
 
 The 1200×630 images in `static/og/` and `static/apple-touch-icon.png` are generated from the project data. After changing a project's name, tagline or tech list, regenerate them:

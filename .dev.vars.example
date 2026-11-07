@@ -1,2 +1,6 @@
-# Copy to .dev.vars for local development. Production uses: wrangler secret put LAB_INGEST_TOKEN
+# Copy to .dev.vars for local development. Production sets each of these with `wrangler secret put`.
 LAB_INGEST_TOKEN=dev-token-change-me
+# Printer camera: the tunnel hostname and an Access service token. Leave CAMERA_URL empty to hide it.
+CAMERA_URL=
+CAMERA_ACCESS_CLIENT_ID=
+CAMERA_ACCESS_CLIENT_SECRET=
