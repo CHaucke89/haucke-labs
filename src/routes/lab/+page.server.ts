@@ -11,6 +11,8 @@ export const load: PageServerLoad = async ({ setHeaders, isDataRequest }) => {
 	// those refreshes from its own cache for up to a minute, so they must always reach the Worker.
 	// The first HTML load keeps a short cache; the refresh brings it up to date right after.
 	setHeaders({ 'cache-control': isDataRequest ? 'no-store' : 'public, max-age=60' });
-	const snapshot = await env.LAB.get<Snapshot>(KV_KEY, 'json');
+	// Preview deployments have no LAB binding (see `previews` in wrangler.jsonc), so treat a
+	// missing namespace as "no data yet" instead of crashing the page.
+	const snapshot = env.LAB ? await env.LAB.get<Snapshot>(KV_KEY, 'json') : null;
 	return { snapshot, now: Date.now() };
 };
