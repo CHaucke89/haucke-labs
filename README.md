@@ -85,13 +85,13 @@ curl -X POST localhost:5173/api/lab -H "Authorization: Bearer dev-token-change-m
 
 One-time setup:
 
-1. **Tunnel**: add a public hostname (e.g. `printer-cam.example.com`) to the existing tunnel, with service `http://192.168.4.140:8080`.
+1. **Tunnel**: add a public hostname (`printer.hauckelabs.dev`) to the existing tunnel, with service `http://<printer LAN IP>:8080`.
 2. **Service token**: Zero Trust → Access → Service credentials → create a token. Copy the client ID and secret.
 3. **Access policy**: on the Access application for that hostname, add a policy with action *Service Auth* that includes the token.
 4. **Worker secrets**:
 
    ```sh
-   pnpm exec wrangler secret put CAMERA_URL                  # https://printer-cam.example.com/
+   pnpm exec wrangler secret put CAMERA_URL                  # https://printer.hauckelabs.dev/
    pnpm exec wrangler secret put CAMERA_ACCESS_CLIENT_ID
    pnpm exec wrangler secret put CAMERA_ACCESS_CLIENT_SECRET
    ```
@@ -99,7 +99,7 @@ One-time setup:
 Without `CAMERA_URL` (previews, local dev by default) the camera is hidden. Check the token from a shell with:
 
 ```sh
-curl -sI "https://printer-cam.example.com/?action=snapshot" \
+curl -sI "https://printer.hauckelabs.dev/?action=snapshot" \
   -H "CF-Access-Client-Id: <id>" -H "CF-Access-Client-Secret: <secret>"
 ```
 
