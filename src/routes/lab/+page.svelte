@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { refreshAll } from '$app/navigation';
+	import PrinterCam from '#lib/components/PrinterCam.svelte';
 	import Seo from '#lib/components/Seo.svelte';
 	import { freshness, type Reading } from '#lib/lab.ts';
 	import type { PageProps } from './$types';
@@ -104,6 +105,10 @@
 			{/if}
 		</p>
 	</header>
+
+	{#if data.camera}
+		<PrinterCam />
+	{/if}
 
 	{#if groups.length === 0}
 		<p class="empty">No data yet. The lab hasn’t reported in.</p>
