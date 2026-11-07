@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { refreshAll } from '$app/navigation';
 	import Seo from '#lib/components/Seo.svelte';
 	import { freshness, type Reading } from '#lib/lab.ts';
 	import type { PageProps } from './$types';
@@ -28,6 +29,55 @@
 		const hours = Math.round(mins / 60);
 		return hours < 48 ? `${hours} h ago` : `${Math.round(hours / 24)} days ago`;
 	};
+
+	// Re-run this page's load on a timer so new readings appear without a reload. Home Assistant
+	// pushes every 5 minutes, so 30 seconds keeps the "updated … ago" label honest without
+	// hammering the Worker.
+	const REFRESH_MS = 30_000;
+
+	$effect(() => {
+		let timer: ReturnType<typeof setInterval> | undefined;
+		let inFlight = false;
+
+		const refresh = async () => {
+			// Skip when a refresh is still running or the device is offline: a failed data request
+			// would replace the page with the error page.
+			if (inFlight || !navigator.onLine) return;
+			inFlight = true;
+			try {
+				await refreshAll();
+			} finally {
+				inFlight = false;
+			}
+		};
+
+		const start = () => {
+			clearInterval(timer);
+			timer = setInterval(refresh, REFRESH_MS);
+		};
+		const stop = () => clearInterval(timer);
+
+		// Pause while the tab is hidden; catch up at once when it comes back.
+		const onVisibility = () => {
+			if (document.hidden) {
+				stop();
+			} else {
+				void refresh();
+				start();
+			}
+		};
+
+		if (!document.hidden) start();
+		document.addEventListener('visibilitychange', onVisibility);
+		window.addEventListener('online', refresh);
+
+		// Runs when the visitor leaves /lab, so no timer or listener outlives the page.
+		return () => {
+			stop();
+			document.removeEventListener('visibilitychange', onVisibility);
+			window.removeEventListener('online', refresh);
+		};
+	});
 
 	const fmt = (v: number | string) =>
 		typeof v === 'number' ? v.toLocaleString('en-US', { maximumFractionDigits: 1 }) : v;
