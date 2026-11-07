@@ -24,8 +24,9 @@ export const POST: RequestHandler = async ({ request }) => {
 	const expected = env.LAB_INGEST_TOKEN;
 	if (!expected) error(503, 'Lab ingest is not configured');
 
-	const auth = request.headers.get('authorization') ?? '';
-	const given = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+	// The auth scheme is case-insensitive (RFC 9110), and stray whitespace is common in YAML configs.
+	const match = /^Bearer\s+(\S+)\s*$/i.exec(request.headers.get('authorization') ?? '');
+	const given = match?.[1] ?? '';
 	if (!tokenMatches(given, expected)) error(401, 'Unauthorized');
 
 	const raw = await request.text();
