@@ -91,7 +91,7 @@
 
 <section>
 	<header>
-		<h1>The lab, live</h1>
+		<h1>Live data from the Haucke home and homelab</h1>
 		<p class="lede">
 			Sensors and devices around my house, reported by Home Assistant to a Cloudflare Worker and
 			stored in KV.
