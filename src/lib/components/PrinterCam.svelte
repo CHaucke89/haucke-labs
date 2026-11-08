@@ -14,6 +14,7 @@
 	$effect(() => {
 		// Re-runs whenever `live` changes, restarting the matching timer.
 		const isLive = live;
+		// Holds a timeout or an interval; clearInterval clears either.
 		let timer: ReturnType<typeof setInterval> | undefined;
 
 		const start = () => {
@@ -39,9 +40,6 @@
 			document.removeEventListener('visibilitychange', onVisibility);
 		};
 	});
-
-	// Keeps the last frame on screen while switching; browsers differ on firing `load` for MJPEG.
-	const toggle = () => (live = !live);
 </script>
 
 <figure class="cam" data-status={status}>
@@ -65,8 +63,15 @@
 		{/if}
 	</div>
 	<figcaption>
-		<span class="mono">{live ? 'Live · stops after 2 min' : 'Snapshot every 5 s'}</span>
-		<button type="button" aria-pressed={live} onclick={toggle} disabled={status === 'offline'}>
+		<span class="mono">
+			{live ? `Live · stops after ${LIVE_MS / 60_000} min` : `Snapshot every ${SNAPSHOT_MS / 1000} s`}
+		</span>
+		<button
+			type="button"
+			aria-pressed={live}
+			onclick={() => (live = !live)}
+			disabled={status === 'offline'}
+		>
 			{live ? 'Back to snapshots' : 'Watch live'}
 		</button>
 	</figcaption>

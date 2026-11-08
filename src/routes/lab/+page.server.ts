@@ -1,5 +1,6 @@
 import { env } from 'cloudflare:workers';
 import { KV_KEY, type Snapshot } from '#lib/lab.ts';
+import { cameraConfig } from '#lib/server/camera.ts';
 import type { PageServerLoad } from './$types';
 
 // Live data, so this page is rendered per request instead of at build time.
@@ -11,5 +12,5 @@ export const load: PageServerLoad = async ({ setHeaders, isDataRequest }) => {
 	// missing namespace as "no data yet" instead of crashing the page.
 	const snapshot = env.LAB ? await env.LAB.get<Snapshot>(KV_KEY, 'json') : null;
 	// Only the fact that a camera exists reaches the page; its URL stays on the Worker.
-	return { snapshot, now: Date.now(), camera: Boolean(env.CAMERA_URL) };
+	return { snapshot, now: Date.now(), camera: cameraConfig() !== null };
 };
