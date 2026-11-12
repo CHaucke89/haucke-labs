@@ -26,6 +26,8 @@ pnpm deploy     # build and deploy with wrangler
 
 Stars, forks and the last push date come from the public GitHub API. They're fetched at build time and baked into the pages, then refreshed in the browser at low priority and cached for 10 minutes per tab. Without a token the API allows 60 requests an hour per IP, so if a build gets rate-limited the stats are left out until the browser refresh fills them in. Counts of zero are hidden.
 
+`/contributions` works the same way, using the search API (`is:pr author:CHaucke89 -user:CHaucke89`) to list merged and open pull requests in other people's repos. Closed-unmerged and draft PRs are left out.
+
 ## Live lab dashboard (`/lab`)
 
 `/lab` is the one page rendered per request instead of prerendered. Home Assistant pushes a snapshot to `POST /api/lab`, the Worker validates it and stores it under one key in the `LAB` KV namespace, and `/lab` reads it back. Only readings listed in the snapshot are ever public, so Home Assistant decides exactly what is shared.
