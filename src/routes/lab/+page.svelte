@@ -10,7 +10,6 @@
 	let snapshot = $derived(data.snapshot);
 	let status = $derived(snapshot ? freshness(snapshot.receivedAt, data.now) : 'offline');
 
-	// Keep Home Assistant's order, grouping readings under their section headings.
 	// Chosen unit lives in component state, so the 30s refresh (which only swaps `data`) keeps it.
 	let unit = $state<TempUnit>('°F');
 
@@ -33,6 +32,7 @@
 		}
 	};
 
+	// Keep Home Assistant's order, grouping readings under their section headings.
 	let groups = $derived.by(() => {
 		const map = new Map<string, Reading[]>();
 		for (const raw of snapshot?.readings ?? []) {
@@ -54,9 +54,7 @@
 		return hours < 48 ? `${hours} h ago` : `${Math.round(hours / 24)} days ago`;
 	};
 
-	// Re-run this page's load on a timer so new readings appear without a reload. Home Assistant
-	// pushes every 5 minutes, so 30 seconds keeps the "updated … ago" label honest without
-	// hammering the Worker.
+	// Home Assistant pushes every 5 minutes; 30s keeps "updated … ago" honest without hammering the Worker.
 	const REFRESH_MS = 30_000;
 
 	$effect(() => {
@@ -95,7 +93,6 @@
 		document.addEventListener('visibilitychange', onVisibility);
 		window.addEventListener('online', refresh);
 
-		// Runs when the visitor leaves /lab, so no timer or listener outlives the page.
 		return () => {
 			stop();
 			document.removeEventListener('visibilitychange', onVisibility);

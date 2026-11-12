@@ -68,7 +68,6 @@
 			(e) => (e.from === current && e.to === nid) || (e.to === current && e.from === nid)
 		);
 
-	// The text version of the diagram: what each component connects to, and where it sits.
 	const end = (nid: string, label?: string) => {
 		const name = byId.get(nid)?.label ?? nid;
 		return label ? `${name} (${label})` : name;

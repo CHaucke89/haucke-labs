@@ -1,6 +1,5 @@
 <script lang="ts">
-	// Printer camera on /lab: a snapshot every few seconds by default, with an opt-in live stream
-	// that times out so an idle tab can't hold a stream open on the home connection.
+	// Live view times out so an idle tab can't hold a stream open on the home connection.
 	const SNAPSHOT_MS = 5_000;
 	const LIVE_MS = 2 * 60_000;
 
@@ -12,7 +11,7 @@
 	let src = $derived(tick ? `/lab/camera?${live ? 'live&' : ''}t=${tick}` : undefined);
 
 	$effect(() => {
-		// Re-runs whenever `live` changes, restarting the matching timer.
+		// Read synchronously so the effect tracks `live`; reads inside timer callbacks aren't tracked.
 		const isLive = live;
 		// Holds a timeout or an interval; clearInterval clears either.
 		let timer: ReturnType<typeof setInterval> | undefined;

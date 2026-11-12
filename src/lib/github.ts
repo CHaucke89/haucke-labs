@@ -5,10 +5,7 @@ export function repoName(url: string): string {
 	return new URL(url).pathname.replace(/^\/+|\/+$/g, '');
 }
 
-/**
- * Reads public stats from the GitHub REST API without a token. Returns null on any failure
- * (rate limit, network, timeout), so callers can simply hide the stats.
- */
+/** Unauthenticated, so rate limits are likely; null on any failure so callers can hide the stats. */
 export async function fetchRepoStats(
 	name: string,
 	fetchFn: typeof fetch = fetch,
