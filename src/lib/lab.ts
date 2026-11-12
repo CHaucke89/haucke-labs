@@ -1,14 +1,12 @@
-// Shape of the homelab snapshot that Home Assistant pushes to /api/lab and /lab renders.
-
 export type Reading = {
 	/** Stable key, e.g. "office_temp". */
 	id: string;
 	/** Human label, e.g. "Office". */
 	label: string;
 	value: number | string;
-	/** Optional unit, e.g. "°F", "%", "h". */
+	/** e.g. "°F", "%", "h". */
 	unit?: string;
-	/** Optional section heading, e.g. "Climate", "3D printer". */
+	/** Section heading, e.g. "Climate", "3D printer". */
 	group?: string;
 };
 
@@ -26,10 +24,7 @@ const MAX_TEXT = 64;
 const text = (v: unknown, max = MAX_TEXT): string | undefined =>
 	typeof v === 'string' && v.trim() !== '' ? v.trim().slice(0, max) : undefined;
 
-/**
- * Validates an untrusted payload into readings. Anything unexpected is dropped rather than
- * stored, because this data is rendered on a public page. Returns null if nothing usable remains.
- */
+/** Drops anything unexpected, since this data is rendered on a public page. */
 export function parseReadings(body: unknown): Reading[] | null {
 	if (!body || typeof body !== 'object' || !Array.isArray((body as { readings?: unknown }).readings)) {
 		return null;
@@ -51,17 +46,14 @@ export function parseReadings(body: unknown): Reading[] | null {
 
 export type Freshness = 'live' | 'stale' | 'offline';
 
-/**
- * Classifies how old a snapshot is, so the page can show whether the lab is reporting.
- * Home Assistant is set to push every 5 minutes (see README).
- */
+/** Thresholds assume Home Assistant pushes every 5 minutes. */
 export function freshness(receivedAt: string, now: number): Freshness {
 	const then = Date.parse(receivedAt);
 	if (Number.isNaN(then)) return 'offline';
 	const age = now - then;
 	if (age < 0) return 'offline';
-	if (age < 10 * 60 * 1000) return 'live'; // <10m
-	if (age < 30 * 60 * 1000) return 'stale'; // <30m
+	if (age < 10 * 60 * 1000) return 'live';
+	if (age < 30 * 60 * 1000) return 'stale';
 	return 'offline';
 }
 

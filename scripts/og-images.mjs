@@ -1,11 +1,4 @@
-// Generates the social preview images in static/og/ and the home screen icon in static/.
-//
-// Run it after changing a project's name, tagline or tech list:
-//   node scripts/og-images.mjs
-//
-// Needs Node 22.18 or later (to import the TypeScript project data) and a local Chrome or
-// Chromium. Set CHROME=/path/to/chrome if it isn't found automatically. If pngquant is
-// installed, the images are compressed afterwards.
+// Rerun after changing a project's name, tagline or tech list; requirements are in the README.
 
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';

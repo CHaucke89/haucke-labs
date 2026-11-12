@@ -20,7 +20,6 @@ export type DiagramEdge = {
 	points?: [number, number][];
 	/** Shared x (vertical edge) or y (horizontal edge) for straight edges. */
 	at?: number;
-	/** Label position override. */
 	labelAt?: [number, number];
 	/** Put a vertical edge's label on its left instead of its right. */
 	labelLeft?: boolean;

@@ -13,8 +13,7 @@ function tokenMatches(given: string, expected: string): boolean {
 	const enc = new TextEncoder();
 	const a = enc.encode(given);
 	const b = enc.encode(expected);
-	// XOR every byte of the expected token, without stopping at the first mismatch; a length
-	// mismatch is folded into the result instead of returning early.
+	// A length mismatch is folded into the result rather than returning early.
 	let diff = a.byteLength ^ b.byteLength;
 	for (let i = 0; i < b.byteLength; i++) diff |= (a[i] ?? 0) ^ b[i];
 	return diff === 0;

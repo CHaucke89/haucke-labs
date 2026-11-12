@@ -1,6 +1,5 @@
 <script lang="ts">
-	// The Haucke Labs HL mark: an H and an L sharing a stem. Colors come from the theme tokens,
-	// so it follows light/dark mode, and the orange L matches "labs" in the wordmark.
+	// Theme tokens keep it in step with light/dark mode; the orange L matches "labs" in the wordmark.
 	let { size = '1.6em' }: { size?: string } = $props();
 </script>
 
