@@ -64,3 +64,16 @@ export function freshness(receivedAt: string, now: number): Freshness {
 	if (age < 30 * 60 * 1000) return 'stale'; // <30m
 	return 'offline';
 }
+
+export type TempUnit = '°C' | '°F';
+
+/** Converts a temperature reading to `to`; other readings pass through unchanged. */
+export function convertTemp(r: Reading, to: TempUnit): Reading {
+	const num = Number(r.value);
+	// Number('') is 0, so rule out blank strings before trusting the parse.
+	if ((r.unit !== '°C' && r.unit !== '°F') || r.unit === to || r.value === '' || !Number.isFinite(num)) {
+		return r;
+	}
+	const value = to === '°F' ? (num * 9) / 5 + 32 : ((num - 32) * 5) / 9;
+	return { ...r, value, unit: to };
+}

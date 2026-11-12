@@ -2,7 +2,7 @@
 	import { refreshAll } from '$app/navigation';
 	import PrinterCam from '#lib/components/PrinterCam.svelte';
 	import Seo from '#lib/components/Seo.svelte';
-	import { freshness, type Reading } from '#lib/lab.ts';
+	import { convertTemp, freshness, type Reading, type TempUnit } from '#lib/lab.ts';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -11,9 +11,32 @@
 	let status = $derived(snapshot ? freshness(snapshot.receivedAt, data.now) : 'offline');
 
 	// Keep Home Assistant's order, grouping readings under their section headings.
+	// Chosen unit lives in component state, so the 30s refresh (which only swaps `data`) keeps it.
+	let unit = $state<TempUnit>('°F');
+
+	// Restore the saved choice after mount; reading it during SSR would cause a hydration mismatch.
+	$effect(() => {
+		try {
+			const saved = localStorage.getItem('lab-unit');
+			if (saved === '°C' || saved === '°F') unit = saved;
+		} catch {
+			// Storage can be blocked; fall back to the default.
+		}
+	});
+
+	const setUnit = (u: TempUnit) => {
+		unit = u;
+		try {
+			localStorage.setItem('lab-unit', u);
+		} catch {
+			// Not persisting is fine.
+		}
+	};
+
 	let groups = $derived.by(() => {
 		const map = new Map<string, Reading[]>();
-		for (const r of snapshot?.readings ?? []) {
+		for (const raw of snapshot?.readings ?? []) {
+			const r = convertTemp(raw, unit);
 			const key = r.group ?? 'Other';
 			map.set(key, [...(map.get(key) ?? []), r]);
 		}
@@ -110,6 +133,14 @@
 		<PrinterCam />
 	{/if}
 
+	<div class="units" role="group" aria-label="Temperature unit">
+		{#each ['°F', '°C'] as const as u (u)}
+			<button type="button" class="mono" aria-pressed={unit === u} onclick={() => setUnit(u)}>
+				{u}
+			</button>
+		{/each}
+	</div>
+
 	{#if groups.length === 0}
 		<p class="empty">No data yet. The lab hasn’t reported in.</p>
 	{:else}
@@ -156,6 +187,25 @@
 		box-shadow: 0 0 0 3px rgb(63 185 80 / 0.25);
 	}
 	[data-status='stale'] .dot {
+		background: var(--accent);
+	}
+	.units {
+		display: inline-flex;
+		margin-top: 1rem;
+		border: 1px solid var(--border);
+		border-radius: 0.5rem;
+		overflow: hidden;
+	}
+	.units button {
+		padding: 0.35rem 0.9rem;
+		font-size: 0.9rem;
+		color: var(--muted);
+		background: var(--surface);
+		border: 0;
+		cursor: pointer;
+	}
+	.units button[aria-pressed='true'] {
+		color: var(--bg, #000);
 		background: var(--accent);
 	}
 	h2 {
