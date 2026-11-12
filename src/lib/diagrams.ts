@@ -492,8 +492,147 @@ const canfield: Diagram = {
 	]
 };
 
+const site: Diagram = {
+	title: 'How this site is built and where the live data comes from',
+	caption:
+		'The top row runs on every push. Below it, Home Assistant and the printer camera reach the site through Cloudflare without any open ports at home.',
+	width: 940,
+	height: 470,
+	groups: [
+		{ label: 'Build and deploy', x: 10, y: 20, w: 690, h: 110 },
+		{ label: 'Home network', x: 10, y: 140, w: 220, h: 320 },
+		{ label: 'Cloudflare', x: 250, y: 140, w: 450, h: 320 },
+		{ label: 'Visitor', x: 720, y: 20, w: 210, h: 440 }
+	],
+	nodes: [
+		{
+			id: 'push',
+			label: 'Push to master',
+			sub: 'GitHub',
+			x: 30,
+			y: 56,
+			kind: 'mine',
+			detail: 'Every change to the site starts as a commit on the master branch.'
+		},
+		{
+			id: 'builds',
+			label: 'Workers Builds',
+			sub: 'build + prerender',
+			x: 270,
+			y: 56,
+			kind: 'upstream',
+			detail:
+				'Cloudflare’s CI picks up each push, runs the SvelteKit build, prerenders every static page with the latest GitHub stats baked in, and deploys the Worker.'
+		},
+		{
+			id: 'static',
+			label: 'Prerendered pages',
+			sub: 'HTML, CSS, images',
+			x: 490,
+			y: 56,
+			kind: 'store',
+			detail:
+				'Home, About, project pages and the sitemap, served as static files from the nearest Cloudflare location. The browser refreshes GitHub stats on its own afterwards.'
+		},
+		{
+			id: 'ha',
+			label: 'Home Assistant',
+			sub: 'every 5 minutes',
+			x: 30,
+			y: 176,
+			kind: 'upstream',
+			detail:
+				'My home automation server. An automation sends a JSON snapshot of the readings I chose to share, with a bearer token, every five minutes.'
+		},
+		{
+			id: 'cam',
+			label: 'Printer camera',
+			sub: 'mjpg-streamer',
+			x: 30,
+			y: 376,
+			kind: 'upstream',
+			detail:
+				'A camera on my 3D printer that serves snapshots and an MJPEG stream on the local network only.'
+		},
+		{
+			id: 'ingest',
+			label: 'POST /api/lab',
+			sub: 'token + validation',
+			x: 270,
+			y: 176,
+			kind: 'mine',
+			detail:
+				'A Worker route that checks the token in constant time, caps the body size and keeps only well-formed readings before storing them.'
+		},
+		{
+			id: 'kv',
+			label: 'Workers KV',
+			sub: 'latest snapshot',
+			x: 270,
+			y: 276,
+			kind: 'store',
+			detail:
+				'A key-value store at the edge. It holds a single key: the most recent snapshot and the time the Worker received it.'
+		},
+		{
+			id: 'lab',
+			label: '/lab page',
+			sub: 'rendered per request',
+			x: 490,
+			y: 276,
+			kind: 'mine',
+			detail:
+				'Reads the snapshot from KV on every request and marks it live, stale or offline by its age. Its data requests are never cached.'
+		},
+		{
+			id: 'access',
+			label: 'Access + Tunnel',
+			sub: 'service token',
+			x: 270,
+			y: 376,
+			kind: 'upstream',
+			detail:
+				'Cloudflare Tunnel connects the camera outward to Cloudflare, and Cloudflare Access blocks anyone without a login or a service token.'
+		},
+		{
+			id: 'camera',
+			label: '/lab/camera',
+			sub: 'authenticated proxy',
+			x: 490,
+			y: 376,
+			kind: 'mine',
+			detail:
+				'Fetches the camera with the Access service token and streams the bytes straight to the browser, so visitors never see the camera’s address or need a login.'
+		},
+		{
+			id: 'browser',
+			label: 'Browser',
+			sub: 'desktop or phone',
+			x: 740,
+			y: 56,
+			h: 376,
+			kind: 'external',
+			detail:
+				'Loads the static pages, polls the Lab page every 30 seconds for new readings, and shows the camera as a snapshot or live stream.'
+		}
+	],
+	edges: [
+		{ from: 'push', to: 'builds' },
+		{ from: 'builds', to: 'static', label: 'deploy' },
+		{ from: 'static', to: 'browser', label: 'HTML' },
+		{ from: 'ha', to: 'ingest', label: 'snapshot' },
+		{ from: 'ingest', to: 'kv', label: 'store' },
+		{ from: 'kv', to: 'lab', label: 'read' },
+		{ from: 'lab', to: 'browser', label: 'poll', both: true },
+		{ from: 'cam', to: 'access', label: 'MJPEG' },
+		{ from: 'access', to: 'camera' },
+		{ from: 'camera', to: 'browser', label: 'stream' }
+	]
+};
+
 export const diagrams: Record<string, Diagram> = {
 	cloudypilot,
 	'op-remote-ui': remoteUi,
-	'canfield-deployment-toolkit': canfield
+	'canfield-deployment-toolkit': canfield,
+	'haucke-labs': site
 };
