@@ -10,6 +10,7 @@
 
 	const nav = [
 		{ href: '/', label: 'Projects' },
+		{ href: '/contributions', label: 'Contributions' },
 		{ href: '/lab', label: 'Lab' },
 		{ href: '/about', label: 'About' }
 	];
@@ -86,7 +87,8 @@
 	}
 	nav {
 		display: flex;
-		gap: 1.25rem;
+		flex-wrap: wrap;
+		gap: 0.5rem 1.25rem;
 	}
 	nav a {
 		color: var(--muted);
