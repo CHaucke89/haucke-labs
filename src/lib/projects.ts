@@ -147,6 +147,51 @@ export const projects: Project[] = [
 			'Refactoring a working script into a maintainable codebase',
 			'Automating builds and releases with CI'
 		]
+	},
+	{
+		slug: 'haucke-labs',
+		name: 'hauckelabs.dev',
+		tagline: 'This site: a mostly static portfolio with a live window into my homelab',
+		summary:
+			'The site you’re reading. It’s prerendered and served from Cloudflare’s edge, with a few routes that run on a Worker to show live readings from Home Assistant and a stream from my 3D printer’s camera.',
+		highlights: [
+			'SvelteKit prerendered to static pages, with only the live routes running per request',
+			'Home Assistant pushes readings to an authenticated endpoint that validates and stores them in KV',
+			'Printer camera proxied through a Cloudflare Access service token, so it never faces the internet',
+			'Interactive architecture diagrams drawn from plain data, with a text version for screen readers'
+		],
+		tech: ['TypeScript', 'SvelteKit', 'Cloudflare Workers', 'Workers KV', 'Home Assistant'],
+		repo: 'https://github.com/CHaucke89/haucke-labs',
+		role: 'Designed and built',
+		problem: [
+			'I wanted one place to show my projects in more depth than a GitHub README: why each one exists, what was hard about it and how the pieces connect.',
+			'I also wanted the site to be a project in its own right, with something live on it, without opening my home network to the internet or paying for a server that sits idle.'
+		],
+		built: [
+			'The site is built with SvelteKit and TypeScript and deployed to Cloudflare Workers. Every page that doesn’t change between visits is prerendered at build time, so most requests are just static files from the nearest Cloudflare location. Pushing to master triggers Workers Builds, which builds and deploys automatically.',
+			'The Lab page is the exception. Every five minutes Home Assistant pushes a snapshot of chosen sensor readings to an API route on the Worker, which checks a bearer token, validates every field and stores the result in Workers KV. The Lab page reads that snapshot on each request and refreshes itself every 30 seconds.',
+			'The printer camera lives on my home network behind a Cloudflare Tunnel protected by Cloudflare Access. The Worker holds an Access service token, fetches snapshots or the live MJPEG stream on the visitor’s behalf, and passes the bytes straight through.',
+			'Project pages pull live GitHub stats, and their architecture diagrams are defined as data and drawn as interactive SVG. Link preview images are rendered from HTML with headless Chrome.'
+		],
+		challenges: [
+			{
+				title: 'Live data without opening my network',
+				body: 'Instead of the site reaching into my house, Home Assistant pushes outward to the site. The endpoint compares tokens in constant time, caps the request size, and keeps only well-formed readings with length limits, because whatever it accepts ends up on a public page.'
+			},
+			{
+				title: 'A private camera on a public page',
+				body: 'An image on a public page can’t log in to Cloudflare Access, so the Worker authenticates instead and the camera’s address never reaches the browser. It refuses redirects to the login page and only passes through image or MJPEG responses, so an error page can never leak through.'
+			},
+			{
+				title: 'Static where possible, live where it matters',
+				body: 'Only three routes run per request. GitHub stats are baked in at build time and refreshed in the browser, so a rate-limited build still produces a working page. The Lab page’s data requests are never cached, so its 30-second refresh always gets fresh readings.'
+			}
+		],
+		learned: [
+			'Building for edge and serverless platforms, and choosing what to render ahead of time',
+			'Treating anything that ends up on a public page as untrusted input',
+			'Making interactive visuals accessible to keyboard and screen reader users'
+		]
 	}
 ];
 
