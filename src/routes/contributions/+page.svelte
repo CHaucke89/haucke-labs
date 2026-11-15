@@ -58,7 +58,7 @@
 
 	{#if all}
 		<div class="columns">
-			{#each [{ id: 'merged', label: 'Merged', items: merged }, { id: 'open', label: 'In review', items: open }] as group (group.id)}
+			{#each [{ id: 'open', label: 'In review', items: open }, { id: 'merged', label: 'Merged', items: merged }] as group (group.id)}
 				{#if group.items.length}
 					<section aria-labelledby="{group.id}-heading">
 						<h2 id="{group.id}-heading">{group.label} <span class="count">{group.items.length}</span></h2>
