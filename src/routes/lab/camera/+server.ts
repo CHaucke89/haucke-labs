@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { cameraConfig } from '#lib/server/camera.ts';
+import { cameraConfig, printerFetch } from '#lib/server/camera.ts';
 import type { RequestHandler } from './$types';
 
 // Proxies the printer camera so visitors never see its hostname or need an Access login.
@@ -14,15 +14,7 @@ export const GET: RequestHandler = async ({ url }) => {
 	const upstream = new URL(camera.url);
 	upstream.searchParams.set('action', live ? 'stream' : 'snapshot');
 
-	const res = await fetch(upstream, {
-		// Cloudflare Access service token: lets this Worker past Access without a browser login.
-		headers: {
-			'CF-Access-Client-Id': camera.clientId,
-			'CF-Access-Client-Secret': camera.clientSecret
-		},
-		// A rejected token gets a redirect to the Access login page; treat it as a failure.
-		redirect: 'manual'
-	}).catch(() => null);
+	const res = await printerFetch(camera, upstream);
 
 	// Network error, tunnel down (Cloudflare answers 502/530), or Access refused the token.
 	if (!res?.ok) error(502, 'Camera is offline');

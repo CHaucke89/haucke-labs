@@ -78,7 +78,8 @@
 
 <style>
 	.cam {
-		margin: 2rem 0 0;
+		margin: 0;
+		flex: 1 1 20rem;
 		max-width: 40rem;
 	}
 	.frame {
