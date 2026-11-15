@@ -1,5 +1,6 @@
 ---
 title: How this blog works
+draft: true
 date: 2026-11-15
 description: A placeholder post showing the format. Posts are Markdown files in the repo, rendered to HTML when the site builds.
 tags: [SvelteKit, Markdown]
