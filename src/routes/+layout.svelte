@@ -3,7 +3,7 @@
 	import favicon from '#lib/assets/favicon.svg';
 	import Logo from '#lib/components/Logo.svelte';
 	import { page } from '$app/state';
-	import { AUTHOR, GITHUB_URL, LINKEDIN_URL, SOURCE_URL } from '#lib/site.ts';
+	import { AUTHOR, GITHUB_URL, LINKEDIN_URL, SITE_NAME, SOURCE_URL } from '#lib/site.ts';
 	import type { LayoutProps } from './$types';
 
 	let { children }: LayoutProps = $props();
@@ -11,17 +11,21 @@
 	const nav = [
 		{ href: '/', label: 'Projects' },
 		{ href: '/contributions', label: 'Contributions' },
+		{ href: '/blog', label: 'Blog' },
 		{ href: '/lab', label: 'Lab' },
 		{ href: '/about', label: 'About' }
 	];
 
-	// Project pages count as part of "Projects".
+	// Project pages count as part of "Projects", posts as part of "Blog".
 	const isCurrent = (href: string, path: string) =>
-		href === '/' ? path === '/' || path.startsWith('/projects/') : path === href;
+		href === '/'
+			? path === '/' || path.startsWith('/projects/')
+			: path === href || (href === '/blog' && path.startsWith('/blog/'));
 </script>
 
 <svelte:head>
 	<link rel="icon" href={favicon} type="image/svg+xml" />
+	<link rel="alternate" type="application/rss+xml" title="{SITE_NAME} blog" href="/blog/rss.xml" />
 </svelte:head>
 
 <a class="skip" href="#main">Skip to content</a>

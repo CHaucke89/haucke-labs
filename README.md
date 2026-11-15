@@ -20,7 +20,28 @@ pnpm deploy     # build and deploy with wrangler
 - `src/lib/diagrams.ts`: the architecture diagrams, as plain data (nodes, edges and groups in SVG coordinates). `src/lib/components/ArchitectureDiagram.svelte` draws them and builds the "Read the diagram as text" version from the same data.
 - `src/lib/site.ts`: the site URL, name and profile links used in page metadata.
 - `src/routes/about/+page.svelte`: the About page.
+- `src/posts/`: the blog posts, one Markdown file each (see below).
 - `src/lib/lab.ts`, `src/routes/lab/`, `src/routes/api/lab/`: the live lab dashboard (see below).
+
+## Blog
+
+To add a post, create `src/posts/<slug>.md`. The file name becomes the URL (`/blog/<slug>`), and the block at the top describes the post:
+
+```md
+---
+title: How this blog works
+date: 2026-11-15
+description: One or two sentences for the post list, link previews and the RSS feed.
+tags: [SvelteKit, Markdown]
+draft: true
+---
+
+Body text. Headings start at `##` because the title is the page's `<h1>`.
+```
+
+`title`, `date` (`YYYY-MM-DD`) and `description` are required; the build fails with a message if one is missing. `draft: true` shows the post in `pnpm dev` but leaves it out of the built site.
+
+`scripts/posts.ts` is a small Vite plugin that turns each file into HTML at build time with marked, and highlights fenced code blocks with Shiki, so neither library ships to the browser. The post list, tag pages (`/blog/tags/<tag>`), `/blog/rss.xml` and the sitemap are all built from the same files. Run `node scripts/og-images.mjs` to give a new post its own share preview image; until then it uses the site-wide one.
 
 ## GitHub stats
 
@@ -109,7 +130,7 @@ A `200` with `content-type: image/jpeg` means the Worker will get through; a `30
 
 ## Share preview images
 
-The 1200×630 images in `static/og/` and `static/apple-touch-icon.png` are generated from the project data. After changing a project's name, tagline or tech list, regenerate them:
+The 1200×630 images in `static/og/` and `static/apple-touch-icon.png` are generated from the project data. After changing a project's name, tagline or tech list, or a post's title, description or tags, regenerate them:
 
 ```sh
 node scripts/og-images.mjs

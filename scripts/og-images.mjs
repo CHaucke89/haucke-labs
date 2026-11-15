@@ -1,14 +1,19 @@
-// Rerun after changing a project's name, tagline or tech list; requirements are in the README.
+// Rerun after changing a project or post's name, tagline or tags; requirements are in the README.
 
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { projects } from '../src/lib/projects.ts';
+import { ogImagePath, readPost } from './posts.ts';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const ogDir = join(root, 'static', 'og');
+const postsDir = join(root, 'src', 'posts');
+const posts = readdirSync(postsDir)
+	.filter((f) => f.endsWith('.md'))
+	.map((f) => readPost(readFileSync(join(postsDir, f), 'utf8'), f));
 
 const ACCENT = '#fb923c';
 const BG = '#0d1117';
@@ -86,6 +91,11 @@ const jobs = [
 		out: join(ogDir, `${p.slug}.png`),
 		size: '1200,630',
 		html: card({ title: p.name, subtitle: p.tagline, chips: p.tech, url: 'hauckelabs.dev' })
+	})),
+	...posts.map((p) => ({
+		out: join(root, 'static', ogImagePath(p.slug)),
+		size: '1200,630',
+		html: card({ title: p.title, subtitle: p.description, chips: p.tags, url: 'hauckelabs.dev/blog' })
 	})),
 	{ out: join(root, 'static', 'apple-touch-icon.png'), size: '180,180', html: icon() }
 ];
