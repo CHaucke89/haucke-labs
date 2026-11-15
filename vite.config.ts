@@ -7,6 +7,9 @@ export default defineConfig({
 	plugins: [
 		posts(),
 		sveltekit({
+		prerender: {
+			handleUnseenRoutes: 'warn'
+		},			
 			compilerOptions: {
 				// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
 				runes: ({ filename }) =>
