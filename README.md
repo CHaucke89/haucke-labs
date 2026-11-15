@@ -119,6 +119,8 @@ One-time setup:
    pnpm exec wrangler secret put CAMERA_ACCESS_CLIENT_SECRET
    ```
 
+5. **Print thumbnail** (optional): on the same tunnel hostname, add a second public hostname entry above the camera's with path `^/(printer/objects/query|server/files/)` and service `http://<printer LAN IP>` (Moonraker behind the web UI's nginx on port 80, or `:7125` directly). `GET /lab/thumbnail` then returns the slicer preview of the job being printed, and `/lab` shows it beside the camera. Moonraker must trust the tunnel host (`trusted_clients`).
+
 Without `CAMERA_URL` (previews, local dev by default) the camera is hidden. Check the token from a shell with:
 
 ```sh

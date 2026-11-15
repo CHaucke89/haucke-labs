@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { refreshAll } from '$app/navigation';
+	import PrintThumbnail from '#lib/components/PrintThumbnail.svelte';
 	import PrinterCam from '#lib/components/PrinterCam.svelte';
 	import Seo from '#lib/components/Seo.svelte';
 	import { convertTemp, freshness, type Reading, type TempUnit } from '#lib/lab.ts';
@@ -127,7 +128,10 @@
 	</header>
 
 	{#if data.camera}
-		<PrinterCam />
+		<div class="printer">
+			<PrinterCam />
+			<PrintThumbnail stamp={data.now} />
+		</div>
 	{/if}
 
 	<div class="units" role="group" aria-label="Temperature unit">
@@ -185,6 +189,13 @@
 	}
 	[data-status='stale'] .dot {
 		background: var(--accent);
+	}
+	.printer {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		gap: 1rem;
+		margin-top: 2rem;
 	}
 	.units {
 		display: inline-flex;

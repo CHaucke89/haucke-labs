@@ -57,25 +57,27 @@
 	</p>
 
 	{#if all}
-		{#each [{ id: 'merged', label: 'Merged', items: merged }, { id: 'open', label: 'In review', items: open }] as group (group.id)}
-			{#if group.items.length}
-				<section aria-labelledby="{group.id}-heading">
-					<h2 id="{group.id}-heading">{group.label} <span class="count">{group.items.length}</span></h2>
-					<ul class="list" role="list">
-						{#each group.items as pr (pr.url)}
-							<li>
-								<a class="title" href={pr.url}>{pr.title}</a>
-								<p class="meta mono">
-									{pr.repo}#{pr.number} ·
-									{pr.status === 'merged' ? 'Merged' : 'Opened'}
-									<time datetime={pr.date}>{formatDate(pr.date)}</time>
-								</p>
-							</li>
-						{/each}
-					</ul>
-				</section>
-			{/if}
-		{/each}
+		<div class="columns">
+			{#each [{ id: 'open', label: 'In review', items: open }, { id: 'merged', label: 'Merged', items: merged }] as group (group.id)}
+				{#if group.items.length}
+					<section aria-labelledby="{group.id}-heading">
+						<h2 id="{group.id}-heading">{group.label} <span class="count">{group.items.length}</span></h2>
+						<ul class="list" role="list">
+							{#each group.items as pr (pr.url)}
+								<li>
+									<a class="title" href={pr.url}>{pr.title}</a>
+									<p class="meta mono">
+										{pr.repo}#{pr.number} ·
+										{pr.status === 'merged' ? 'Merged' : 'Opened'}
+										<time datetime={pr.date}>{formatDate(pr.date)}</time>
+									</p>
+								</li>
+							{/each}
+						</ul>
+					</section>
+				{/if}
+			{/each}
+		</div>
 	{:else}
 		<p>GitHub didn’t respond just now. <a href={searchUrl}>See the list on GitHub</a> instead.</p>
 	{/if}
@@ -83,15 +85,22 @@
 
 <style>
 	article {
-		max-width: 46rem;
+		max-width: 70rem;
 		padding-block: 2rem;
 	}
 	h1 {
 		font-size: clamp(2rem, 5vw, 2.75rem);
 	}
 	.lede {
+		max-width: 46rem;
 		font-size: 1.15rem;
 		color: var(--muted);
+	}
+	.columns {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+		gap: 0 2rem;
+		align-items: start;
 	}
 	h2 {
 		margin-top: 2.5rem;
