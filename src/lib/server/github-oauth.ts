@@ -10,6 +10,17 @@ export interface OAuthState {
 	next: string;
 }
 
+export function parseOAuthState(raw: string | undefined): OAuthState | null {
+	try {
+		const v = JSON.parse(raw ?? '');
+		return typeof v?.state === 'string' && typeof v.verifier === 'string' && typeof v.next === 'string'
+			? { state: v.state, verifier: v.verifier, next: v.next }
+			: null;
+	} catch {
+		return null;
+	}
+}
+
 export function oauthConfig(): { clientId: string; clientSecret: string } | null {
 	const clientId = env.GITHUB_CLIENT_ID;
 	const clientSecret = env.GITHUB_CLIENT_SECRET;

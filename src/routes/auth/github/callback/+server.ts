@@ -5,7 +5,7 @@ import {
 	fetchGitHubUser,
 	OAUTH_COOKIE,
 	oauthConfig,
-	type OAuthState
+	parseOAuthState
 } from '#lib/server/github-oauth.ts';
 import { setSession } from '#lib/server/session.ts';
 import type { RequestHandler } from './$types';
@@ -16,14 +16,9 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 	const config = oauthConfig();
 	if (!config) error(503, 'Sign-in is not configured');
 
-	const raw = cookies.get(OAUTH_COOKIE);
+	const login = parseOAuthState(cookies.get(OAUTH_COOKIE));
 	cookies.delete(OAUTH_COOKIE, { path: '/auth/github' });
-	let login: OAuthState;
-	try {
-		login = JSON.parse(raw ?? '');
-	} catch {
-		error(400, 'Sign-in expired. Please try again.');
-	}
+	if (!login) error(400, 'Sign-in expired. Please try again.');
 
 	// The state proves this callback answers a login this browser started, which blocks login CSRF.
 	if (url.searchParams.get('state') !== login.state) error(400, 'Sign-in state did not match');

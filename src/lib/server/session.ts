@@ -76,6 +76,8 @@ export function clearSession(cookies: Cookies): void {
 
 /** A same-site path to return to after signing in or out; anything else falls back to `/`. */
 export function safeNext(next: string | null | undefined): string {
-	// "//evil.com" and "/\evil.com" are protocol-relative URLs to another site.
-	return next && next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/\\') ? next : '/';
+	if (!next?.startsWith('/')) return '/';
+	// Parse rather than pattern-match: browsers also read "//x", "/\x" and "/<tab>/x" as another host.
+	const url = new URL(next, 'http://local');
+	return url.origin === 'http://local' ? url.pathname + url.search + url.hash : '/';
 }
