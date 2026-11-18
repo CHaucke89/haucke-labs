@@ -16,6 +16,9 @@
 	"upload_source_maps": true,
 	// No id: `wrangler deploy` provisions the namespace on first deploy.
 	"kv_namespaces": [{ "binding": "LAB" }],
-	// `wrangler preview` refuses to run without this block. Previews don't inherit bindings, so they have no LAB.
+	// Also provisioned on first deploy. Migrations in ./migrations are applied by hand with
+	// `wrangler d1 migrations apply haucke-labs`.
+	"d1_databases": [{ "binding": "DB", "database_name": "haucke-labs" }],
+	// `wrangler preview` refuses to run without this block. Previews don't inherit bindings, so they have no LAB or DB.
 	"previews": {}
 }
