@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import favicon from '#lib/assets/favicon.svg';
+	import AuthStatus from '#lib/components/AuthStatus.svelte';
 	import Logo from '#lib/components/Logo.svelte';
 	import { page } from '$app/state';
 	import { AUTHOR, GITHUB_URL, LINKEDIN_URL, SITE_NAME, SOURCE_URL } from '#lib/site.ts';
@@ -13,6 +14,7 @@
 		{ href: '/contributions', label: 'Contributions' },
 		{ href: '/blog', label: 'Blog' },
 		{ href: '/lab', label: 'Lab' },
+		{ href: '/guestbook', label: 'Guestbook' },
 		{ href: '/about', label: 'About' }
 	];
 
@@ -41,6 +43,7 @@
 		{/each}
 		<a href={GITHUB_URL}>GitHub</a>
 		<a href={LINKEDIN_URL}>LinkedIn</a>
+		<AuthStatus />
 	</nav>
 </header>
 

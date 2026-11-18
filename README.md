@@ -22,6 +22,7 @@ pnpm deploy     # build and deploy with wrangler
 - `src/routes/about/+page.svelte`: the About page.
 - `src/posts/`: the blog posts, one Markdown file each (see below).
 - `src/lib/lab.ts`, `src/routes/lab/`, `src/routes/api/lab/`: the live lab dashboard (see below).
+- `src/lib/server/session.ts`, `src/routes/auth/`, `src/routes/guestbook/`, `migrations/`: GitHub sign-in and the guestbook (see below).
 
 ## Blog
 
@@ -51,7 +52,7 @@ Stars, forks and the last push date come from the public GitHub API. They're fet
 
 ## Live lab dashboard (`/lab`)
 
-`/lab` is the one page rendered per request instead of prerendered. Home Assistant pushes a snapshot to `POST /api/lab`, the Worker validates it and stores it under one key in the `LAB` KV namespace, and `/lab` reads it back. Only readings listed in the snapshot are ever public, so Home Assistant decides exactly what is shared.
+`/lab` is rendered per request instead of prerendered (as is `/guestbook`). Home Assistant pushes a snapshot to `POST /api/lab`, the Worker validates it and stores it under one key in the `LAB` KV namespace, and `/lab` reads it back. Only readings listed in the snapshot are ever public, so Home Assistant decides exactly what is shared.
 
 One-time setup:
 
@@ -129,6 +130,35 @@ curl -sI "https://printer.hauckelabs.dev/?action=snapshot" \
 ```
 
 A `200` with `content-type: image/jpeg` means the Worker will get through; a `302` to `cloudflareaccess.com` means the policy doesn't include the token.
+
+## Sign in with GitHub and the guestbook (`/guestbook`)
+
+Visitors sign in with GitHub (OAuth 2.0 authorization code flow with PKCE) and leave one short note each, stored in Cloudflare D1.
+
+- `GET /auth/github/login` stores a random `state` and PKCE verifier in a 10-minute HttpOnly cookie and redirects to GitHub, asking only for `read:user`.
+- `GET /auth/github/callback` checks `state`, exchanges the code (plus verifier and client secret) for a token server-side, reads `GET /user`, and drops the token. The session is the user's id and login in an HMAC-signed, HttpOnly cookie that lasts 7 days.
+- `POST /auth/logout` clears it. `GET /auth/me` tells the prerendered header who is signed in.
+- `src/hooks.server.ts` verifies the cookie on every server request and sets `event.locals.user`.
+- Notes are up to 280 characters, one per GitHub account, editable once a minute. Svelte escapes them when rendering.
+
+One-time setup:
+
+1. Create two GitHub OAuth Apps (Settings → Developer settings → OAuth Apps): one with callback `https://hauckelabs.dev/auth/github/callback`, one with `http://localhost:5173/auth/github/callback` for local development.
+2. Set the production secrets:
+
+   ```sh
+   pnpm exec wrangler secret put GITHUB_CLIENT_ID
+   pnpm exec wrangler secret put GITHUB_CLIENT_SECRET
+   openssl rand -hex 32 | pnpm exec wrangler secret put SESSION_SECRET
+   ```
+
+3. The first deploy creates the `haucke-labs` D1 database. Then create the table:
+
+   ```sh
+   pnpm exec wrangler d1 migrations apply haucke-labs --remote
+   ```
+
+For local development, put the dev app's credentials and a `SESSION_SECRET` in `.dev.vars`, then run `pnpm exec wrangler d1 migrations apply haucke-labs --local` once. New migrations go in `migrations/` as numbered `.sql` files.
 
 ## Share preview images
 
