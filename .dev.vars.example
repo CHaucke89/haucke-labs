@@ -7,5 +7,8 @@ CAMERA_ACCESS_CLIENT_SECRET=
 # Sign in with GitHub: a separate OAuth App whose callback is http://localhost:5173/auth/github/callback.
 GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=
+# Sign in with Google: a Web application OAuth client with redirect URI http://localhost:5173/auth/google/callback.
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
 # Signs the session cookie. Generate with `openssl rand -hex 32`.
 SESSION_SECRET=

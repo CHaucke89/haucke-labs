@@ -1,4 +1,4 @@
-import type { SessionUser } from '#lib/server/session.ts';
+import type { SessionUser } from '#lib/auth.ts';
 
 declare global {
 	namespace App {

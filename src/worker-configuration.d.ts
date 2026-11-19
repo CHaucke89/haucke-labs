@@ -11,6 +11,8 @@ interface __BaseEnv_Env {
 	CAMERA_ACCESS_CLIENT_SECRET: string;
 	GITHUB_CLIENT_ID: string;
 	GITHUB_CLIENT_SECRET: string;
+	GOOGLE_CLIENT_ID: string;
+	GOOGLE_CLIENT_SECRET: string;
 	SESSION_SECRET: string;
 }
 declare namespace Cloudflare {
@@ -21,7 +23,7 @@ type StringifyValues<EnvType extends Record<string, unknown>> = {
 	[Binding in keyof EnvType]: EnvType[Binding] extends string ? EnvType[Binding] : string;
 };
 declare namespace NodeJS {
-	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "LAB_INGEST_TOKEN" | "CAMERA_URL" | "CAMERA_ACCESS_CLIENT_ID" | "CAMERA_ACCESS_CLIENT_SECRET" | "GITHUB_CLIENT_ID" | "GITHUB_CLIENT_SECRET" | "SESSION_SECRET">> {}
+	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "LAB_INGEST_TOKEN" | "CAMERA_URL" | "CAMERA_ACCESS_CLIENT_ID" | "CAMERA_ACCESS_CLIENT_SECRET" | "GITHUB_CLIENT_ID" | "GITHUB_CLIENT_SECRET" | "GOOGLE_CLIENT_ID" | "GOOGLE_CLIENT_SECRET" | "SESSION_SECRET">> {}
 }
 declare module "*.txt" {
 	const value: string;
