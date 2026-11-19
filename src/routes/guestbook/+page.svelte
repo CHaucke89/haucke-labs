@@ -2,7 +2,9 @@
 	import { enhance } from '$app/forms';
 	import Seo from '#lib/components/Seo.svelte';
 	import { formatDate } from '#lib/github.ts';
-	import { avatarUrl, MAX_MESSAGE } from '#lib/guestbook.ts';
+	import { loginUrl, PROVIDER_IDS, PROVIDERS } from '#lib/auth.ts';
+	import Avatar from '#lib/components/Avatar.svelte';
+	import { MAX_MESSAGE, profileUrl } from '#lib/guestbook.ts';
 	import type { PageProps } from './$types';
 
 	let { data, form }: PageProps = $props();
@@ -15,14 +17,14 @@
 
 <Seo
 	title="Guestbook"
-	description="Sign in with GitHub and leave a short note for Christopher Haucke."
+	description="Sign in with GitHub or Google and leave a short note for Christopher Haucke."
 />
 
 <section>
 	<header>
 		<h1>Guestbook</h1>
 		<p class="lede">
-			Sign in with GitHub and leave a note. Only your GitHub username and avatar are shown, and you
+			Sign in with GitHub or Google and leave a note. Only your name and avatar are shown, and you
 			can edit or delete your note any time.
 		</p>
 	</header>
@@ -42,7 +44,7 @@
 			}}
 		>
 			<label for="message">
-				Signed in as <strong>{data.user.login}</strong>.
+				Signed in with {PROVIDERS[data.user.provider]} as <strong>{data.user.name}</strong>.
 				{data.mine ? 'Edit your note' : 'Leave a note'}:
 			</label>
 			<textarea id="message" name="message" rows="3" maxlength={MAX_MESSAGE * 2} bind:value={draft}
@@ -60,9 +62,14 @@
 			</div>
 		</form>
 	{:else}
-		<a class="signin" href="/auth/github/login?next=/guestbook" data-sveltekit-reload>
-			Sign in with GitHub to leave a note
-		</a>
+		<p>Sign in to leave a note:</p>
+		<div class="row">
+			{#each PROVIDER_IDS as id (id)}
+				<a class="signin" href={loginUrl(id, '/guestbook')} data-sveltekit-reload>
+					Sign in with {PROVIDERS[id]}
+				</a>
+			{/each}
+		</div>
 	{/if}
 
 	{#if data.available}
@@ -70,12 +77,14 @@
 			<p class="empty">No notes yet. Be the first.</p>
 		{:else}
 			<ol class="entries">
-				{#each data.entries as entry (entry.userId)}
+				{#each data.entries as entry (`${entry.provider}:${entry.userId}`)}
+					{@const profile = profileUrl(entry)}
 					<li>
-						<img src={avatarUrl(entry.userId)} alt="" width="40" height="40" loading="lazy" />
+						<Avatar src={entry.avatar} name={entry.name} size={40} />
 						<div>
 							<p class="meta">
-								<a href="https://github.com/{entry.login}">{entry.login}</a>
+								{#if profile}<a href={profile}>{entry.name}</a>{:else}<strong>{entry.name}</strong>{/if}
+								<span class="via">via {PROVIDERS[entry.provider]}</span>
 								<time datetime={entry.createdAt}>{formatDate(entry.createdAt)}</time>
 							</p>
 							<p class="message">{entry.message}</p>
@@ -174,16 +183,13 @@
 		border: 1px solid var(--border);
 		border-radius: 0.5rem;
 	}
-	.entries img {
-		border-radius: 50%;
-		flex-shrink: 0;
-	}
 	.meta {
 		margin: 0;
 		display: flex;
 		gap: 0.75rem;
 		align-items: baseline;
 	}
+	.meta .via,
 	.meta time {
 		color: var(--muted);
 		font-size: 0.85rem;

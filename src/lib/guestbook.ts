@@ -1,15 +1,20 @@
+import type { ProviderId } from '#lib/auth.ts';
+
 export const MAX_MESSAGE = 280;
 
 export interface GuestbookEntry {
-	userId: number;
-	login: string;
+	provider: ProviderId;
+	userId: string;
+	name: string;
+	avatar: string | null;
 	message: string;
 	createdAt: string;
 	updatedAt: string;
 }
 
-export const avatarUrl = (userId: number, size = 64) =>
-	`https://avatars.githubusercontent.com/u/${userId}?s=${size}`;
+/** Only GitHub names are public profiles worth linking to. */
+export const profileUrl = (entry: GuestbookEntry) =>
+	entry.provider === 'github' ? `https://github.com/${entry.name}` : null;
 
 /** Trimmed message with runs of blank lines collapsed, or an error to show the visitor. */
 export function cleanMessage(raw: unknown): { message: string } | { error: string } {

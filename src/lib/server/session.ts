@@ -1,14 +1,18 @@
 import { env } from 'cloudflare:workers';
 import type { Cookies } from '@sveltejs/kit';
-
-export interface SessionUser {
-	id: number;
-	login: string;
-}
+import { isProvider, type SessionUser } from '#lib/auth.ts';
 
 interface Payload extends SessionUser {
 	exp: number;
 }
+
+// Rejects cookies from before sign-in had providers, so those visitors just sign in again.
+const isPayload = (p: Partial<Payload> | null): p is Payload =>
+	isProvider(p?.provider) &&
+	typeof p.id === 'string' &&
+	typeof p.name === 'string' &&
+	(typeof p.avatar === 'string' || p.avatar === null) &&
+	typeof p.exp === 'number';
 
 export const SESSION_COOKIE = 'session';
 const MAX_AGE_S = 7 * 24 * 60 * 60;
@@ -41,7 +45,7 @@ function hmacKey(): Promise<CryptoKey> {
 }
 
 export async function setSession(cookies: Cookies, user: SessionUser): Promise<void> {
-	const payload: Payload = { id: user.id, login: user.login, exp: Date.now() + MAX_AGE_S * 1000 };
+	const payload: Payload = { ...user, exp: Date.now() + MAX_AGE_S * 1000 };
 	const body = base64url(enc.encode(JSON.stringify(payload)));
 	const sig = new Uint8Array(await crypto.subtle.sign('HMAC', await hmacKey(), enc.encode(body)));
 	cookies.set(SESSION_COOKIE, `${body}.${base64url(sig)}`, {
@@ -63,8 +67,10 @@ export async function readSession(cookies: Cookies): Promise<SessionUser | null>
 		// subtle.verify compares in constant time, unlike comparing two signature strings.
 		const ok = await crypto.subtle.verify('HMAC', await hmacKey(), fromBase64url(sig), enc.encode(body));
 		if (!ok) return null;
-		const payload: Payload = JSON.parse(new TextDecoder().decode(fromBase64url(body)));
-		return payload.exp > Date.now() ? { id: payload.id, login: payload.login } : null;
+		const p: Partial<Payload> | null = JSON.parse(new TextDecoder().decode(fromBase64url(body)));
+		return isPayload(p) && p.exp > Date.now()
+			? { provider: p.provider, id: p.id, name: p.name, avatar: p.avatar }
+			: null;
 	} catch {
 		return null;
 	}

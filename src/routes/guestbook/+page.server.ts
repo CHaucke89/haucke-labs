@@ -1,5 +1,6 @@
 import { env } from 'cloudflare:workers';
 import { error, fail, redirect } from '@sveltejs/kit';
+import type { ProviderId } from '#lib/auth.ts';
 import { cleanMessage, type GuestbookEntry } from '#lib/guestbook.ts';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -9,16 +10,20 @@ const PAGE_SIZE = 100;
 const EDIT_COOLDOWN_MS = 60_000;
 
 interface Row {
-	user_id: number;
-	login: string;
+	provider: ProviderId;
+	provider_user_id: string;
+	name: string;
+	avatar_url: string | null;
 	message: string;
 	created_at: string;
 	updated_at: string;
 }
 
 const toEntry = (r: Row): GuestbookEntry => ({
-	userId: r.user_id,
-	login: r.login,
+	provider: r.provider,
+	userId: r.provider_user_id,
+	name: r.name,
+	avatar: r.avatar_url,
 	message: r.message,
 	createdAt: r.created_at,
 	updatedAt: r.updated_at
@@ -33,7 +38,9 @@ export const load: PageServerLoad = async ({ locals, setHeaders }) => {
 	const [{ results }, mine] = await Promise.all([
 		env.DB.prepare('SELECT * FROM guestbook ORDER BY created_at DESC LIMIT ?').bind(PAGE_SIZE).all<Row>(),
 		locals.user
-			? env.DB.prepare('SELECT * FROM guestbook WHERE user_id = ?').bind(locals.user.id).first<Row>()
+			? env.DB.prepare('SELECT * FROM guestbook WHERE provider = ? AND provider_user_id = ?')
+					.bind(locals.user.provider, locals.user.id)
+					.first<Row>()
 			: null
 	]);
 	return {
@@ -58,13 +65,14 @@ export const actions: Actions = {
 		// Insert, or update the visitor's existing note. The WHERE on the update enforces the
 		// cooldown in the same statement, so two quick submits can't both get through.
 		const { meta } = await env.DB.prepare(
-			`INSERT INTO guestbook (user_id, login, message, created_at, updated_at)
-			 VALUES (?1, ?2, ?3, ?4, ?4)
-			 ON CONFLICT (user_id) DO UPDATE
-			 SET login = excluded.login, message = excluded.message, updated_at = excluded.updated_at
-			 WHERE guestbook.updated_at < ?5`
+			`INSERT INTO guestbook (provider, provider_user_id, name, avatar_url, message, created_at, updated_at)
+			 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?6)
+			 ON CONFLICT (provider, provider_user_id) DO UPDATE
+			 SET name = excluded.name, avatar_url = excluded.avatar_url, message = excluded.message,
+			     updated_at = excluded.updated_at
+			 WHERE guestbook.updated_at < ?7`
 		)
-			.bind(user.id, user.login, result.message, now, cutoff)
+			.bind(user.provider, user.id, user.name, user.avatar, result.message, now, cutoff)
 			.run();
 		if (meta.changes === 0) return fail(429, { error: 'You just saved a note. Try again in a minute.' });
 		return { saved: true };
@@ -73,7 +81,9 @@ export const actions: Actions = {
 	delete: async ({ locals }) => {
 		if (!locals.user) error(401, 'Sign in first');
 		if (!env.DB) error(503, 'Guestbook is unavailable');
-		await env.DB.prepare('DELETE FROM guestbook WHERE user_id = ?').bind(locals.user.id).run();
+		await env.DB.prepare('DELETE FROM guestbook WHERE provider = ? AND provider_user_id = ?')
+			.bind(locals.user.provider, locals.user.id)
+			.run();
 		redirect(303, '/guestbook');
 	}
 };

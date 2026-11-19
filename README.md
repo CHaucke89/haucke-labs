@@ -22,7 +22,7 @@ pnpm deploy     # build and deploy with wrangler
 - `src/routes/about/+page.svelte`: the About page.
 - `src/posts/`: the blog posts, one Markdown file each (see below).
 - `src/lib/lab.ts`, `src/routes/lab/`, `src/routes/api/lab/`: the live lab dashboard (see below).
-- `src/lib/server/session.ts`, `src/routes/auth/`, `src/routes/guestbook/`, `migrations/`: GitHub sign-in and the guestbook (see below).
+- `src/lib/server/session.ts`, `src/routes/auth/`, `src/routes/guestbook/`, `migrations/`: GitHub and Google sign-in and the guestbook (see below).
 
 ## Blog
 
@@ -131,34 +131,38 @@ curl -sI "https://printer.hauckelabs.dev/?action=snapshot" \
 
 A `200` with `content-type: image/jpeg` means the Worker will get through; a `302` to `cloudflareaccess.com` means the policy doesn't include the token.
 
-## Sign in with GitHub and the guestbook (`/guestbook`)
+## Sign in with GitHub or Google and the guestbook (`/guestbook`)
 
-Visitors sign in with GitHub (OAuth 2.0 authorization code flow with PKCE) and leave one short note each, stored in Cloudflare D1.
+Visitors sign in with GitHub or Google (OAuth 2.0 authorization code flow with PKCE) and leave one short note each, stored in Cloudflare D1. Each provider is a config entry in `src/lib/server/oauth.ts` (authorize URL, token URL, scopes, and how to read the profile); `src/lib/auth.ts` lists them for the UI.
 
-- `GET /auth/github/login` stores a random `state` and PKCE verifier in a 10-minute HttpOnly cookie and redirects to GitHub, asking only for `read:user`.
-- `GET /auth/github/callback` checks `state`, exchanges the code (plus verifier and client secret) for a token server-side, reads `GET /user`, and drops the token. The session is the user's id and login in an HMAC-signed, HttpOnly cookie that lasts 7 days.
+- `GET /auth/<provider>/login` stores a random `state` and PKCE verifier in a 10-minute HttpOnly cookie and redirects to the provider. GitHub is asked for `read:user`; Google for `openid profile` (no email).
+- `GET /auth/<provider>/callback` checks `state`, exchanges the code (plus verifier and client secret) for a token server-side, reads the profile (GitHub `GET /user`, Google's OpenID Connect userinfo endpoint), and drops the token. The session is the provider, the provider's user id, a display name and an avatar URL in an HMAC-signed, HttpOnly cookie that lasts 7 days.
+- Visitors are identified by `(provider, provider user id)`. Accounts on different providers are never merged, even with the same email.
 - `POST /auth/logout` clears it. `GET /auth/me` tells the prerendered header who is signed in.
 - `src/hooks.server.ts` verifies the cookie on every server request and sets `event.locals.user`.
-- Notes are up to 280 characters, one per GitHub account, editable once a minute. Svelte escapes them when rendering.
+- Notes are up to 280 characters, one per account, editable once a minute. Svelte escapes them when rendering.
 
 One-time setup:
 
 1. Create two GitHub OAuth Apps (Settings → Developer settings → OAuth Apps): one with callback `https://hauckelabs.dev/auth/github/callback`, one with `http://localhost:5173/auth/github/callback` for local development.
-2. Set the production secrets:
+2. In Google Cloud Console (APIs & Services → Credentials), create a Web application OAuth client with redirect URIs `https://hauckelabs.dev/auth/google/callback` and `http://localhost:5173/auth/google/callback`.
+3. Set the production secrets:
 
    ```sh
    pnpm exec wrangler secret put GITHUB_CLIENT_ID
    pnpm exec wrangler secret put GITHUB_CLIENT_SECRET
+   pnpm exec wrangler secret put GOOGLE_CLIENT_ID
+   pnpm exec wrangler secret put GOOGLE_CLIENT_SECRET
    openssl rand -hex 32 | pnpm exec wrangler secret put SESSION_SECRET
    ```
 
-3. The first deploy creates the `haucke-labs` D1 database. Then create the table:
+4. The first deploy creates the `haucke-labs` D1 database. Then create or update the tables:
 
    ```sh
    pnpm exec wrangler d1 migrations apply haucke-labs --remote
    ```
 
-For local development, put the dev app's credentials and a `SESSION_SECRET` in `.dev.vars`, then run `pnpm exec wrangler d1 migrations apply haucke-labs --local` once. New migrations go in `migrations/` as numbered `.sql` files.
+For local development, put the dev apps' credentials and a `SESSION_SECRET` in `.dev.vars`, then run `pnpm exec wrangler d1 migrations apply haucke-labs --local` once. New migrations go in `migrations/` as numbered `.sql` files.
 
 ## Share preview images
 
