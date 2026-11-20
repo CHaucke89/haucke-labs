@@ -4,6 +4,7 @@
 	import { formatDate } from '#lib/github.ts';
 	import { loginUrl, PROVIDER_IDS, PROVIDERS } from '#lib/auth.ts';
 	import Avatar from '#lib/components/Avatar.svelte';
+	import GuestbookToggle from '#lib/components/GuestbookToggle.svelte';
 	import { MAX_MESSAGE, profileUrl } from '#lib/guestbook.ts';
 	import type { PageProps } from './$types';
 
@@ -27,6 +28,7 @@
 			Sign in with GitHub or Google and leave a note. Only your name and avatar are shown, and you
 			can edit or delete your note any time.
 		</p>
+		<GuestbookToggle current="svelte" />
 	</header>
 
 	{#if !data.available}

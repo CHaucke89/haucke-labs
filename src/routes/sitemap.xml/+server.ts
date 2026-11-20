@@ -12,6 +12,7 @@ export const GET: RequestHandler = () => {
 		'/blog',
 		'/lab',
 		'/guestbook',
+		'/guestbook/angular',
 		'/about',
 		...projects.map((p) => `/projects/${p.slug}`),
 		...posts.map((p) => `/blog/${p.slug}`),
