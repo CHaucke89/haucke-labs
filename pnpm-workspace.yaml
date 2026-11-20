@@ -1,3 +1,6 @@
+packages:
+  - angular-guestbook
+
 allowBuilds:
   esbuild: true
 

@@ -8,8 +8,10 @@ export default defineConfig({
 		posts(),
 		sveltekit({
 		prerender: {
+			// Only the dynamic /guestbook page links here, so the crawler wouldn't find it.
+			entries: ['*', '/guestbook/angular'],
 			handleUnseenRoutes: 'warn'
-		},			
+		},
 			compilerOptions: {
 				// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
 				runes: ({ filename }) =>

@@ -10,7 +10,8 @@ Built with SvelteKit and TypeScript, prerendered and deployed to Cloudflare Work
 pnpm install
 pnpm dev        # local dev server
 pnpm check      # type-check
-pnpm build      # production build
+pnpm build      # production build (the Angular guestbook, then the site)
+pnpm build:angular  # just the Angular guestbook, needed once before `pnpm dev` to see /guestbook/angular
 pnpm deploy     # build and deploy with wrangler
 ```
 
@@ -23,6 +24,7 @@ pnpm deploy     # build and deploy with wrangler
 - `src/posts/`: the blog posts, one Markdown file each (see below).
 - `src/lib/lab.ts`, `src/routes/lab/`, `src/routes/api/lab/`: the live lab dashboard (see below).
 - `src/lib/server/session.ts`, `src/routes/auth/`, `src/routes/guestbook/`, `migrations/`: GitHub and Google sign-in and the guestbook (see below).
+- `angular-guestbook/`: the Angular version of the guestbook, a pnpm workspace package (see below).
 
 ## Blog
 
@@ -163,6 +165,12 @@ One-time setup:
    ```
 
 For local development, put the dev apps' credentials and a `SESSION_SECRET` in `.dev.vars`, then run `pnpm exec wrangler d1 migrations apply haucke-labs --local` once. New migrations go in `migrations/` as numbered `.sql` files.
+
+### The Angular version (`/guestbook/angular`)
+
+The same guestbook, built in Angular to compare the two frameworks. Both versions share `src/lib/server/guestbook.ts`: the Svelte page reaches it through form actions, and the Angular one through `/api/guestbook` (`GET` reads, `POST { message }` signs or edits, `DELETE` removes; each returns the updated guestbook).
+
+`angular-guestbook/` is an Angular CLI project that wraps one component as the `<hl-guestbook>` custom element with Angular Elements. `ng build` writes `static/ng-guestbook/main.js` (gitignored), and the SvelteKit page at `/guestbook/angular` loads it. The component uses Shadow DOM; the site's CSS custom properties pass through, so the theme applies. It imports `src/lib/auth.ts`, `guestbook.ts` and `github.ts` directly, so both versions share types and validation.
 
 ## Share preview images
 

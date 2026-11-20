@@ -1,0 +1,24 @@
+{
+	"name": "angular-guestbook",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"build": "ng build"
+	},
+	"dependencies": {
+		"@angular/common": "22.3.0",
+		"@angular/compiler": "22.3.0",
+		"@angular/core": "22.3.0",
+		"@angular/elements": "22.3.0",
+		"@angular/platform-browser": "22.3.0",
+		"rxjs": "^7.8.2",
+		"tslib": "^2.9.1"
+	},
+	"devDependencies": {
+		"@angular/build": "22.3.0",
+		"@angular/cli": "22.3.0",
+		"@angular/compiler-cli": "22.3.0",
+		"typescript": "6.0.3"
+	}
+}

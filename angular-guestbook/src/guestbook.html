@@ -1,0 +1,82 @@
+@let s = state.value();
+@let st = status();
+
+@if (state.error()) {
+	<p class="error" role="alert">
+		Couldn’t load the guestbook.
+		<button type="button" class="secondary" (click)="state.reload()">Retry</button>
+	</p>
+} @else if (!s) {
+	<p class="empty">Loading…</p>
+} @else if (!s.available) {
+	<p class="empty">The guestbook isn’t available here.</p>
+} @else {
+	@if (s.user; as user) {
+		<form (submit)="save($event)">
+			<label for="message">
+				Signed in with {{ providers[user.provider] }} as <strong>{{ user.name }}</strong>.
+				{{ s.mine ? 'Edit your note' : 'Leave a note' }}:
+			</label>
+			<textarea
+				#box
+				id="message"
+				name="message"
+				rows="3"
+				[maxLength]="max * 2"
+				[value]="draft()"
+				(input)="draft.set(box.value)"
+			></textarea>
+			<div class="row">
+				<span class="count mono" [class.over]="length() > max">{{ length() }}/{{ max }}</span>
+				@if (st && 'error' in st) {
+					<span class="error" role="alert">{{ st.error }}</span>
+				}
+				@if (st && 'saved' in st) {
+					<span class="saved" role="status">Saved. Thanks!</span>
+				}
+				@if (s.mine) {
+					<button type="button" class="secondary" [disabled]="saving()" (click)="remove()">Delete</button>
+				}
+				<button type="submit" [disabled]="saving() || length() === 0 || length() > max">
+					{{ s.mine ? 'Update' : 'Sign' }}
+				</button>
+			</div>
+		</form>
+	} @else {
+		<p>Sign in to leave a note:</p>
+		<div class="row">
+			@for (id of providerIds; track id) {
+				<a class="signin" [href]="signInUrl(id)">Sign in with {{ providers[id] }}</a>
+			}
+		</div>
+	}
+
+	@if (s.entries.length === 0) {
+		<p class="empty">No notes yet. Be the first.</p>
+	} @else {
+		<ol class="entries">
+			@for (entry of s.entries; track entry.provider + ':' + entry.userId) {
+				@let profile = profileUrl(entry);
+				<li>
+					@if (entry.avatar) {
+						<img class="avatar" [src]="entry.avatar" alt="" width="40" height="40" loading="lazy" referrerpolicy="no-referrer" />
+					} @else {
+						<span class="avatar initial" aria-hidden="true">{{ entry.name.charAt(0).toUpperCase() }}</span>
+					}
+					<div>
+						<p class="meta">
+							@if (profile) {
+								<a [href]="profile">{{ entry.name }}</a>
+							} @else {
+								<strong>{{ entry.name }}</strong>
+							}
+							<span class="via">via {{ providers[entry.provider] }}</span>
+							<time [attr.datetime]="entry.createdAt">{{ formatDate(entry.createdAt) }}</time>
+						</p>
+						<p class="message">{{ entry.message }}</p>
+					</div>
+				</li>
+			}
+		</ol>
+	}
+}

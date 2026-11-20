@@ -27,3 +27,7 @@ vite.config.ts.timestamp-*
 
 CLAUDE.local.md
 CLAUDE.md
+
+# Built by angular-guestbook
+/static/ng-guestbook
+/angular-guestbook/.angular

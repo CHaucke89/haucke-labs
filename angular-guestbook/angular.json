@@ -1,0 +1,32 @@
+{
+	"$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+	"version": 1,
+	"cli": { "analytics": false, "packageManager": "pnpm" },
+	"newProjectRoot": "",
+	"projects": {
+		"guestbook": {
+			"projectType": "application",
+			"root": "",
+			"sourceRoot": "src",
+			"prefix": "hl",
+			"architect": {
+				"build": {
+					"builder": "@angular/build:application",
+					"options": {
+						"browser": "src/main.ts",
+						"tsConfig": "tsconfig.json",
+						"index": false,
+						"outputPath": { "base": "../static/ng-guestbook", "browser": "" },
+						"outputHashing": "none",
+						"budgets": [{ "type": "initial", "maximumWarning": "200kB", "maximumError": "300kB" }]
+					},
+					"configurations": {
+						"production": {},
+						"development": { "optimization": false, "sourceMap": true }
+					},
+					"defaultConfiguration": "production"
+				}
+			}
+		}
+	}
+}

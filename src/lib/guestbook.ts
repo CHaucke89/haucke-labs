@@ -1,4 +1,4 @@
-import type { ProviderId } from '#lib/auth.ts';
+import type { ProviderId, SessionUser } from './auth.ts';
 
 export const MAX_MESSAGE = 280;
 
@@ -10,6 +10,14 @@ export interface GuestbookEntry {
 	message: string;
 	createdAt: string;
 	updatedAt: string;
+}
+
+/** What GET /api/guestbook returns, and what the Svelte page loads. */
+export interface GuestbookState {
+	entries: GuestbookEntry[];
+	mine: GuestbookEntry | null;
+	available: boolean;
+	user: SessionUser | null;
 }
 
 /** Only GitHub names are public profiles worth linking to. */

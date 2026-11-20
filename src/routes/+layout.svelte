@@ -18,11 +18,11 @@
 		{ href: '/about', label: 'About' }
 	];
 
-	// Project pages count as part of "Projects", posts as part of "Blog".
+	// Project pages count as part of "Projects"; nested pages count as part of their section.
 	const isCurrent = (href: string, path: string) =>
 		href === '/'
 			? path === '/' || path.startsWith('/projects/')
-			: path === href || (href === '/blog' && path.startsWith('/blog/'));
+			: path === href || path.startsWith(`${href}/`);
 </script>
 
 <svelte:head>
