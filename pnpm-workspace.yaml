@@ -1,5 +1,6 @@
 packages:
   - angular-guestbook
+  - react-guestbook
 
 allowBuilds:
   esbuild: true
