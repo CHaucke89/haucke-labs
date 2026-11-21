@@ -8,13 +8,13 @@
 
 <Seo
 	title="Blog"
-	description="Tutorials and notes by Christopher Haucke on things learned while building his open source projects."
+	description="Christopher Haucke's Blog"
 />
 
 <article>
 	<h1>Blog</h1>
 	<p class="lede">
-		Tutorials and notes on things I’ve learned while working on my projects.
+		Notes, observations, anything.
 		<a href="/blog/rss.xml">Subscribe with RSS</a>.
 	</p>
 

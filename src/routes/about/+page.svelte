@@ -14,35 +14,36 @@
 
 	<!-- DRAFT BIO: replace with your own words. -->
 	<p class="lede">
-		I’m Chris Haucke. I’m pivoting back into software engineering, and I learn best by jumping in and building
+		I’m Chris. I’m pivoting into full-time software engineering, and I learn best by jumping in and building
 		things I actually use.
 	</p>
 
 	<p>
-		My day job puts me close to the machines: setting up and supporting Windows workstations for clinical
-		imaging systems. When that setup turned into a long checklist of repetitive steps, I wrote the
-		<a href="https://github.com/CHaucke89/canfield-deployment-toolkit">Canfield Deployment Toolkit</a>
+		At Canfield, I work directly with our machines: building, calibrating, and troubleshooting
+		clinical imaging systems. When setting up the computers that drive our systems became cumbersome,
+		I wrote the <a href="https://github.com/CHaucke89/canfield-deployment-toolkit">Canfield Deployment Toolkit</a>
 		to turn it into one guided app, with automated builds and releases on GitHub.
 	</p>
 
 	<p>
 		Outside of work I maintain <a href="https://github.com/CHaucke89/cloudypilot">cloudypilot</a>,
-		my fork of the open source driver-assistance software sunnypilot, running on my own car. Keeping
-		a fork current with a fast-moving upstream has taught me to read unfamiliar code carefully, keep
+		my fork of the open source driver-assistance software sunnypilot, running daily in my own car. Keeping
+		a fork current with a fast-moving upstream using multiple languages has taught me to read unfamiliar code carefully, keep
 		changes small, and contribute fixes back: several of my pull requests have been merged into sunnypilot.
-		When openpilot rewrote its UI and broke the remote-display tool I relied on, I ported it to the
+		When openpilot rewrote its UI and broke a community remote UI tool, I ported it to the
 		new stack: <a href="https://github.com/CHaucke89/op-remote-ui-raylib">openpilot Remote UI Streamer</a>.
 	</p>
 
 	<p>
 		Right now I’m broadening my skills across the stack, from Python and C++ on embedded Linux to
-		web development. This site is part of that too: it’s built with SvelteKit and TypeScript and
+		web development. I'm exploring the modern frameworks and languages available today, figuring out which skills
+		to hone. This site is part of that too: it’s built with SvelteKit and TypeScript and
 		deployed on Cloudflare.
 	</p>
 
 	<p>
 		Away from the keyboard I’m still building: automating my home, wiring ESP32 boards into custom
-		devices, and 3D printing enclosures and parts for them. Most of that happens when I’m not
+		devices, and 3D printing things to make mine and my family's lives easier. Most of that happens when I’m not
 		wrangling my one-year-old son.
 	</p>
 
