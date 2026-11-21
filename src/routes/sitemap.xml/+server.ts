@@ -13,6 +13,7 @@ export const GET: RequestHandler = () => {
 		'/lab',
 		'/guestbook',
 		'/guestbook/angular',
+		'/guestbook/react',
 		'/about',
 		...projects.map((p) => `/projects/${p.slug}`),
 		...posts.map((p) => `/blog/${p.slug}`),

@@ -10,8 +10,9 @@ Built with SvelteKit and TypeScript, prerendered and deployed to Cloudflare Work
 pnpm install
 pnpm dev        # local dev server
 pnpm check      # type-check
-pnpm build      # production build (the Angular guestbook, then the site)
+pnpm build      # production build (the Angular and React guestbooks, then the site)
 pnpm build:angular  # just the Angular guestbook, needed once before `pnpm dev` to see /guestbook/angular
+pnpm build:react    # just the React guestbook, needed once before `pnpm dev` to see /guestbook/react
 pnpm deploy     # build and deploy with wrangler
 ```
 
@@ -24,7 +25,7 @@ pnpm deploy     # build and deploy with wrangler
 - `src/posts/`: the blog posts, one Markdown file each (see below).
 - `src/lib/lab.ts`, `src/routes/lab/`, `src/routes/api/lab/`: the live lab dashboard (see below).
 - `src/lib/server/session.ts`, `src/routes/auth/`, `src/routes/guestbook/`, `migrations/`: GitHub and Google sign-in and the guestbook (see below).
-- `angular-guestbook/`: the Angular version of the guestbook, a pnpm workspace package (see below).
+- `angular-guestbook/`, `react-guestbook/`: the Angular and React versions of the guestbook, each a pnpm workspace package (see below).
 
 ## Blog
 
@@ -170,7 +171,11 @@ For local development, put the dev apps' credentials and a `SESSION_SECRET` in `
 
 The same guestbook, built in Angular to compare the two frameworks. Both versions share `src/lib/server/guestbook.ts`: the Svelte page reaches it through form actions, and the Angular one through `/api/guestbook` (`GET` reads, `POST { message }` signs or edits, `DELETE` removes; each returns the updated guestbook).
 
-`angular-guestbook/` is an Angular CLI project that wraps one component as the `<hl-guestbook>` custom element with Angular Elements. `ng build` writes `static/ng-guestbook/main.js` (gitignored), and the SvelteKit page at `/guestbook/angular` loads it. The component uses Shadow DOM; the site's CSS custom properties pass through, so the theme applies. It imports `src/lib/auth.ts`, `guestbook.ts` and `github.ts` directly, so both versions share types and validation.
+`angular-guestbook/` is an Angular CLI project that wraps one component as the `<hl-guestbook>` custom element with Angular Elements. `ng build` writes `static/ng-guestbook/main.js` (gitignored), and the SvelteKit page at `/guestbook/angular` loads it. The component uses Shadow DOM; the site's CSS custom properties pass through, so the theme applies. It imports `src/lib/auth.ts`, `guestbook.ts` and `github.ts` directly, so all versions share types and validation.
+
+### The React version (`/guestbook/react`)
+
+Built the same way, to compare a third framework. `react-guestbook/` is a Vite project whose entry, `src/main.tsx`, defines a plain `<hl-react-guestbook>` custom element that renders the React app into its own shadow root (React has no equivalent of Angular Elements, so the wrapper is written by hand). `vite build` writes `static/react-guestbook/main.js` (gitignored), and the SvelteKit page at `/guestbook/react` loads it. It talks to `/api/guestbook` and imports the same `src/lib` files by relative path, since `#lib/*` only resolves inside SvelteKit.
 
 ## Share preview images
 

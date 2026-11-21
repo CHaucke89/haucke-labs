@@ -1,9 +1,10 @@
 <script lang="ts">
-	let { current }: { current: 'svelte' | 'angular' } = $props();
+	let { current }: { current: 'svelte' | 'angular' | 'react' } = $props();
 
 	const versions = [
 		{ id: 'svelte', label: 'Svelte', href: '/guestbook' },
-		{ id: 'angular', label: 'Angular', href: '/guestbook/angular' }
+		{ id: 'angular', label: 'Angular', href: '/guestbook/angular' },
+		{ id: 'react', label: 'React', href: '/guestbook/react' }
 	] as const;
 </script>
 

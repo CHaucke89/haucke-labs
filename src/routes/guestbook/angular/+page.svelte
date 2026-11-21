@@ -23,8 +23,8 @@
 	<header>
 		<h1>Guestbook</h1>
 		<p class="lede">
-			The same guestbook, built as an Angular web component and embedded in this SvelteKit page. Both
-			versions read and write the same notes.
+			The same guestbook, built as an Angular web component and embedded in this SvelteKit page. All
+			three versions read and write the same notes.
 		</p>
 		<GuestbookToggle current="angular" />
 	</header>

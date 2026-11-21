@@ -8,8 +8,8 @@ export default defineConfig({
 		posts(),
 		sveltekit({
 		prerender: {
-			// Only the dynamic /guestbook page links here, so the crawler wouldn't find it.
-			entries: ['*', '/guestbook/angular'],
+			// Only the dynamic /guestbook page links here, so the crawler wouldn't find these.
+			entries: ['*', '/guestbook/angular', '/guestbook/react'],
 			handleUnseenRoutes: 'warn'
 		},
 			compilerOptions: {
