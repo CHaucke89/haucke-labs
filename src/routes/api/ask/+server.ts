@@ -25,7 +25,13 @@ export const POST: RequestHandler = async ({ request, getClientAddress }) => {
 	const result = cleanConversation(body?.messages);
 	if ('error' in result) return fail(400, result.error);
 
-	const limited = await takeQuota(request.headers.get('cf-connecting-ip') ?? getClientAddress());
+	let limited: string | null;
+	try {
+		limited = await takeQuota(request.headers.get('cf-connecting-ip') ?? getClientAddress());
+	} catch (err) {
+		console.error('ask quota failed', err);
+		return fail(503, 'The assistant isn’t available right now.');
+	}
 	if (limited) return fail(429, limited);
 
 	return new Response(answer(result.messages, request.signal), {

@@ -1,5 +1,5 @@
 export const MAX_QUESTION = 500;
-export const MAX_ANSWER = 4000;
+export const MAX_ANSWER = 6000;
 /** Earlier turns sent back with each question, so follow-ups like "what did he learn from it?" work. */
 export const MAX_MESSAGES = 9;
 
