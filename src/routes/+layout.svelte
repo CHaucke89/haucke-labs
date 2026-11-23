@@ -15,6 +15,7 @@
 		{ href: '/blog', label: 'Blog' },
 		{ href: '/lab', label: 'Lab' },
 		{ href: '/guestbook', label: 'Guestbook' },
+		{ href: '/ask', label: 'Ask' },
 		{ href: '/about', label: 'About' }
 	];
 

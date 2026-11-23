@@ -2,10 +2,12 @@ import adapter from "@sveltejs/adapter-cloudflare";
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { posts } from './scripts/posts.ts';
+import { readmes } from './scripts/readmes.ts';
 
 export default defineConfig({
 	plugins: [
 		posts(),
+		readmes(),
 		sveltekit({
 		prerender: {
 			// Only the dynamic /guestbook page links here, so the crawler wouldn't find these.

@@ -12,3 +12,5 @@ GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 # Signs the session cookie. Generate with `openssl rand -hex 32`.
 SESSION_SECRET=
+# Ask about my work: a Claude API key from platform.claude.com. Leave empty to hide the assistant.
+ANTHROPIC_API_KEY=

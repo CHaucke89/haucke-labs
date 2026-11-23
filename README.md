@@ -25,6 +25,7 @@ pnpm deploy     # build and deploy with wrangler
 - `src/posts/`: the blog posts, one Markdown file each (see below).
 - `src/lib/lab.ts`, `src/routes/lab/`, `src/routes/api/lab/`: the live lab dashboard (see below).
 - `src/lib/server/session.ts`, `src/routes/auth/`, `src/routes/guestbook/`, `migrations/`: GitHub and Google sign-in and the guestbook (see below).
+- `src/lib/server/ask.ts`, `src/routes/ask/`, `src/routes/api/ask/`, `scripts/readmes.ts`: the "Ask about my work" assistant (see below).
 - `angular-guestbook/`, `react-guestbook/`: the Angular and React versions of the guestbook, each a pnpm workspace package (see below).
 
 ## Blog
@@ -176,6 +177,31 @@ The same guestbook, built in Angular to compare the two frameworks. Both version
 ### The React version (`/guestbook/react`)
 
 Built the same way, to compare a third framework. `react-guestbook/` is a Vite project whose entry, `src/main.tsx`, defines a plain `<hl-react-guestbook>` custom element that renders the React app into its own shadow root (React has no equivalent of Angular Elements, so the wrapper is written by hand). `vite build` writes `static/react-guestbook/main.js` (gitignored), and the SvelteKit page at `/guestbook/react` loads it. It talks to `/api/guestbook` and imports the same `src/lib` files by relative path, since `#lib/*` only resolves inside SvelteKit.
+
+## Ask about my work (`/ask`)
+
+Visitors ask questions about my projects and Claude answers, using only this site's content. `POST /api/ask` takes `{ messages }` (the conversation, alternating user and assistant, ending with a question) and streams the answer back as NDJSON: `{"text": "..."}` lines, then `{"done": true, "truncated": false}` or `{"error": "..."}`.
+
+- **Context**: `src/lib/server/ask.ts` builds one system prompt from the project write-ups (`src/lib/projects.ts`), each project's README, the About page and the published blog posts. `scripts/readmes.ts` is a Vite plugin that fetches the READMEs from GitHub at build time (a failed fetch leaves that README out and logs a warning), so the prompt only changes on deploy.
+- **Model and cost**: Claude Haiku 5.5 at low effort, with output capped at 1,024 tokens. The system prompt (about 15,000 tokens) is marked for prompt caching with a 1-hour TTL, so repeat questions read it at a tenth of the input price. Each request logs its token usage, visible in Workers Logs.
+- **Limits**: questions up to 500 characters, at most 9 messages per request; 5 questions a minute per IP (the `ASK_LIMITER` rate limiting binding, approximate and per location); 20 questions a day per visitor and 300 a day for the whole site (the `ask_usage` table in D1, keyed by a salted hash of the IP, so no addresses are stored).
+- Without `ANTHROPIC_API_KEY`, the `DB` binding or the rate limiter (previews, local dev without a key), the page loads but the API answers 503.
+
+One-time setup:
+
+1. Create an API key at [platform.claude.com](https://platform.claude.com) (a workspace with a spend limit is a good backstop), then:
+
+   ```sh
+   pnpm exec wrangler secret put ANTHROPIC_API_KEY
+   ```
+
+2. After the deploy, create the usage table:
+
+   ```sh
+   pnpm exec wrangler d1 migrations apply haucke-labs --remote
+   ```
+
+For local development, set `ANTHROPIC_API_KEY` in `.dev.vars` and apply the migrations with `--local`. The limits and the model are constants at the top of `src/lib/server/ask.ts`.
 
 ## Share preview images
 
