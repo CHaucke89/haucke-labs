@@ -49,6 +49,41 @@ export type Diagram = {
 export const NODE_W = 170;
 export const NODE_H = 56;
 
+export const nodeRect = (n: DiagramNode) => ({ x: n.x, y: n.y, w: n.w ?? NODE_W, h: n.h ?? NODE_H });
+
+export type EdgeGeometry = { d: string; lx: number; ly: number; anchor: 'start' | 'middle' | 'end' };
+
+export function edgeGeometry(e: DiagramEdge, byId: Map<string, DiagramNode>): EdgeGeometry {
+	const a = nodeRect(byId.get(e.from)!);
+	const b = nodeRect(byId.get(e.to)!);
+	if (e.points) {
+		const d = 'M' + e.points.map(([x, y]) => `${x} ${y}`).join(' L');
+		const mid = e.labelAt ?? e.points[Math.floor(e.points.length / 2)];
+		return { d, lx: mid[0], ly: mid[1], anchor: 'middle' };
+	}
+	const xOverlap = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+	const yOverlap = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+	if (xOverlap > 0 && yOverlap <= 0) {
+		const x = e.at ?? (Math.max(a.x, b.x) + Math.min(a.x + a.w, b.x + b.w)) / 2;
+		const [y1, y2] = a.y < b.y ? [a.y + a.h, b.y] : [a.y, b.y + b.h];
+		const ly = (y1 + y2) / 2 + 4;
+		return e.labelLeft
+			? { d: `M${x} ${y1} L${x} ${y2}`, lx: x - 6, ly, anchor: 'end' }
+			: { d: `M${x} ${y1} L${x} ${y2}`, lx: x + 6, ly, anchor: 'start' };
+	}
+	if (yOverlap > 0) {
+		const y = e.at ?? (Math.max(a.y, b.y) + Math.min(a.y + a.h, b.y + b.h)) / 2;
+		const [x1, x2] = a.x < b.x ? [a.x + a.w, b.x] : [a.x, b.x + b.w];
+		return { d: `M${x1} ${y} L${x2} ${y}`, lx: (x1 + x2) / 2, ly: y - 7, anchor: 'middle' };
+	}
+	const right = b.x > a.x;
+	const x1 = right ? a.x + a.w : a.x;
+	const y1 = a.y + a.h / 2;
+	const x2 = b.x + b.w / 2;
+	const y2 = b.y > a.y ? b.y : b.y + b.h;
+	return { d: `M${x1} ${y1} L${x2} ${y1} L${x2} ${y2}`, lx: (x1 + x2) / 2, ly: y1 - 7, anchor: 'middle' };
+}
+
 const remoteUi: Diagram = {
 	title: 'How a frame gets from the car’s screen to your browser',
 	caption:
